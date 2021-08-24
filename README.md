@@ -33,8 +33,8 @@ pip3 install -r requirements.txt
 
 2. 进行**FFMpeg**程序的下载，👉[点击这里](http://ffmpeg.org/download.html)👈进入官网进行下载：
 
-   * **Windows部署：**将下载的压缩包解压后，复制压缩文件中的`ffmpeg.exe`并粘贴到`biliDownloader`程序根目录下即可。
-   * **Ubuntu部署：**可利用以下代码进行简单安装，若需要使用比较新的版本，请进入官网下载并且编译。
+   * **Windows部署**：将下载的压缩包解压后，复制压缩文件中的`ffmpeg.exe`并粘贴到`biliDownloader`程序根目录下即可。
+   * **Ubuntu部署**：可利用以下代码进行简单安装，若需要使用比较新的版本，请进入官网下载并且编译。
 
    ```shell
    sudo add-apt-repository -y ppa:djcj/hybrid
