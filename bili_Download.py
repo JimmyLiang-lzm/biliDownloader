@@ -43,6 +43,12 @@ class bili_downloader(object):
             "sec-fetch-mode": "cors",
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"
         }
+        with open('setting.conf', 'r', encoding='utf-8') as f:
+            tempr = json.loads(f.read())
+            self.index_headers["cookie"] = tempr["cookie"]
+            self.second_headers["cookie"] = tempr["cookie"]
+            self.systemd = tempr["sys"]
+            f.close()
 
     # File name conflict replace
     def name_replace(self,name):
@@ -125,6 +131,7 @@ class bili_downloader(object):
             return -1
         if os.path.exists(self.output + '/down_audio.m4s'):
             print("文件：{}\n已存在。".format(self.output + '/down_audio.m4s'))
+            return -1
         flag,video_name,_,down_dic = self.search_preinfo()
         # if os.path.exists(self.output + '/' + video_name + '.mp4'):
         #     print("文件：{}\n已存在。",self.output + '/' + video_name + '.mp4')
@@ -190,8 +197,15 @@ class bili_downloader(object):
                 input_a = self.output + '/down_audio.m4s'
                 output_add = self.output + '/' + video_name + '.mp4'
                 print('正在启动ffmpeg......')
-                ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
-                ffcommand = ffpath + '/ffmpeg.exe -i ' + input_v + ' -i ' + input_a + ' -c:v copy -c:a aac -strict experimental ' + output_add
+                ffcommand = ""
+                if self.systemd == "windows":
+                    ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
+                    ffcommand = ffpath + '/ffmpeg.exe -i ' + input_v + ' -i ' + input_a + ' -c:v copy -c:a aac -strict experimental ' + output_add
+                elif self.systemd == "linux":
+                    ffcommand = 'ffmpeg -i' + input_v + ' -i ' + input_a + ' -c:v copy -c:a aac -strict experimental ' + output_add
+                else:
+                    print("未知操作系统：无法确定FFMpeg命令。")
+                    return -2
                 try:
                     if subprocess.call(ffcommand, shell=True):
                         raise Exception("{} 执行失败。".format(ffcommand))
