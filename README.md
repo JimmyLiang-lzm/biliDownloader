@@ -1,25 +1,25 @@
-# bilibili弹幕网视频下载器😀
+# Bilibili Video Downloader😀
 
 [![maven](https://img.shields.io/badge/Python-3.8.8-blue.svg)](https://www.python.org/)  [![mavel](https://img.shields.io/badge/GPL-3.0-red.svg)](https://github.com/JimmyLiang-lzm/biliDownloader/blob/master/LICENSE) ![mavel](https://img.shields.io/badge/requests-2.26.0-green.svg) ![mavel](https://img.shields.io/badge/tqdm-4.62.1-green.svg) 
 
-## 特性✨
+## feature✨
 
-1. 本程序基于`Python 3.8.8`进行编写，代码可读性强，易于移植；
-2. 可使用参数直接进行控制，方便与服务器环境下使用；
-3. 仅需一句代码即可进行视频下载，省略繁琐的操作；
-4. 可自动合成视频，也可以进行音视频分离下载；
-5. 可通过探查获取不同清晰度的音视频流，并进行下载；
-6. 下载过程中若主下载线路阻塞，软件将自动选择备用线路进行下载；
-7. 可进行付费番剧或大会员高质量视频的下载（正处于测试阶段……）；
-8. 代码采用GPL-3.0许可协议保护。
+1. This program is written based on `Python 3.8.8`, the code is readable and easy to transplant;
+2. Parameters can be used for direct control, which is convenient for use in server; 
+3. Only one line of code is needed to download the video, omitting tedious operations;
+4. Automatically synthesize video, and also can separate audio and video for download;
+5. Can obtain audio and video streams of different definitions, and can be selectively downloaded;
+6. If the main download line is blocked during the download process, the software will automatically select the alternate line for downloading;
+7. Can download paid cartoon or VIP high-quality video (currently in the testing stage...);
+8. The code is protected by GPL-3.0 license agreement.
 
-## 如何使用？🕹
+## How to use?🕹
 
-### 1. Python环境下的安装和使用
+### 1. Installation and use in Python environment
 
-**安装**：
+**Installation**:
 
-1. 首先确保你的Python版本为3.8.8或以上，随后按照以下代码进行环境构建；
+1. First make sure that your Python version is 3.8.8 or above, and then build the environment according to the following code;
 
 ```shell
 git clone https://github.com/JimmyLiang-lzm/biliDownloader.git
@@ -27,10 +27,10 @@ cd biliDownloader
 pip3 install -r requirements.txt
 ```
 
-2. 进行**FFMpeg**程序的下载，👉[点击这里](http://ffmpeg.org/download.html)👈进入官网进行下载：
+2. Download the **FFMpeg** program, 👉[click here](http://ffmpeg.org/download.html) 👈 and enter the official website to download:
 
-   * **Windows部署**：将下载的压缩包解压后，复制压缩文件中的`ffmpeg.exe`并粘贴到`biliDownloader`程序根目录下即可。
-   * **Ubuntu部署**：可利用以下代码进行简单安装，若需要使用比较新的版本，请进入官网下载并且编译。
+   * **Windows deployment**: After decompressing the downloaded compressed package, copy the `ffmpeg.exe` from the compressed file and paste it into the root directory of the `biliDownloader` program.
+   * **Ubuntu deployment: **You can use the following code for simple installation. If you need to use a latest version, please download and compile it from the official website.
 
    ```shell
    sudo add-apt-repository -y ppa:djcj/hybrid
@@ -38,68 +38,67 @@ pip3 install -r requirements.txt
    sudo apt install -y ffmpeg
    ```
 
-3. 更改初始化参数，进入根目录中的`setting.conf`文件中，将`"sys":"XXX"`中的`XXX`修改成你使用的系统平台。使用Windows平台时请修改为`windows`，使用Ubuntu平台时请修改为`ubuntu`。
+3. Change the initialization parameters, enter the `setting.conf` file in the root directory, and modify the `XXX` in `"sys":"XXX"` to the system platform you are using. Please change to `windows` when using Windows platform, and change to `ubuntu` when using Ubuntu platform.
 
-**使用：**
+**Use:**
 
-若要检查视频下载地址，可直接使用以下代码进行查看，其中`HTTPAddress`代表网页地址：
+You can directly use the following code to view the video download address, where `HTTPAddress` represents the web page address:
 
 ```shell
 python3 bili_Download.py -a HTTPAddress -c
 ```
 
-若要进行视频下载，可直接使用以下代码进行下载，`OutputPath`代表输出文件夹：
+You can directly use the following code to download, `OutputPath` represents the output folder:
 
 ```shell
 python3 bili_Download.py -a HTTPAddress -o OutputPath
 ```
 
-### 2. Windows系统环境下的安装与使用
+### 2. Installation and use under Windows
 
-**安装：**
+**Installation:**
 
-1. 进入本项目**release**中进行下载，下载完成后进行解压；
-2. 进行**FFMpeg**程序的下载，👉[点击这里](https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-2021-08-14-git-acd079843b-full_build.7z)👈进行下载，解压后将"bin->ffmpeg.exe"解压到"bili_Download"文件夹中。
-3. 更改初始化参数，打开根目录`bili_Download`文件夹中的`setting.conf`文件，将`"sys":"XXX"`中的`XXX`修改成`windows`。
+1. Enter the **release** from this project to download, and unzip after downloading;
+2. Download the **FFMpeg** program, 👉[click here](https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-2021-08-14-git-acd079843b-full_build.7z)👈 to download. After finished, unzip "bin->ffmpeg.exe" to the "bili_Download" folder.
+3. Change the initialization parameters. Open the `setting.conf` file in the root folder `bili_Download`, and modify the `XXX` in `"sys":"XXX"` to `windows`.
 
-**使用：**
+**Use:**
 
-为了方便在Windows系统中进行使用，请点击解压目录中的`Start.bat`批处理脚本，若要检查视频下载地址，可直接使用以下代码进行查看，其中`HTTPAddress`代表网页地址：
+In order to facilitate use in Windows, please click on batch script `Start.bat` in the unzipped directory. To check the video download address, you can directly use the following code to view, where `HTTPAddress` represents the web page address:
 
 ```shell
 bili_Download.exe -a HTTPAddress -c
 ```
 
-若要进行视频下载，可直接使用以下代码进行下载，`OutputPath`代表输出文件夹：
+You can directly use the following code to download, `OutputPath` represents the output folder:
 
 ```shell
 bili_Download.exe -a HTTPAddress -o OutputPath
 ```
 
-若不使用批处理脚本，则需要在`bili_Download.exe`前面加入**绝对地址**。
+If you **DO NOT** use batch scripts, you need to add **absolute address** before `bili_Download.exe`.
 
-## 参数🛠
+## Parameters🛠
 
-为了能正确的使用本程序，参数如下：
+In order to use this program correctly, the parameters are as follows:
 
-* `-a`, `--address`：输入视频页面的HTTP/HTTPS地址，若参数中不带有`-v`，`--version`，`-h`，`--help`时，此项为必填项；
-* `-o`, `--output`：下载视频到本地的输出文件夹地址，默认值为程序根目录；
-* `-vq`, `--video-quality`：选择视频清晰度，接受数据类型为整数型数据，可使用`-c`或`--check`进行查看，默认值为**0**；
-* `-ar`, `--audio-quality`：选择音频清晰度，接受数据类型为整数型数据，可使用`-c`或`--check`进行查看，默认值为**0**；
-* `-s`, `--synthesis`：在视频下载完成后是否执行合成，仅支持输入`0`或`1`；其中`0`表示不进行合成，``1``表示进行合成；默认值为``1``；**此选项只有在完成FFMpeg部署之后才能实现！**
-* `-c`, `--check`：检查视频页面是否有可用于下载的音频流与视频流，并显示出来；当此参数出现时，将不会进行视频下载；
-* `-v`, `--version`：查看软件版本信息；
-* `-h`, `--help`：显示软件帮助信息。
+* `-a`, `--address`: Enter the HTTP/HTTPS address of the video page, if the parameter does not contain `-v`, `--version`, `-h`, `--help`, then this item is required;
+* `-o`, `--output`: Download the video to the local output folder address, the default value is the program root directory;
+* `-vq`, `--video-quality`: Select the video resolution, accept the data type as integer data, you can use `-c` or `--check` to view, the default value is **0**;
+* `-ar`, `--audio-quality`: Select audio quality, accept data type as integer data, you can use `-c` or `--check` to view, the default value is **0**;
+* `-s`, `--synthesis`: Whether to perform synthesis after the video is downloaded, only `0` or `1` is supported. Among them, `0` means no synthesis, `1` means synthesis; the default value is ``1``; **this The option can only be realized after the deployment of FFMpeg!**
+* `-c`, `--check`: Check whether there are audio streams and video streams available for download on the video page, and display them; when this parameter appears, no video download will be performed;
+* `-v`, `--version`: View software version information;
+* `-h`, `--help`: Display software help information.
 
-## 关于大会员视频下载
+## About VIP video download
 
-本人还未开通大会员，因此还未进行有关的测试，按理论来说，只要访问请求的cookie键值对中带有大会员请求的验证值，就可以进行下载。此功能暂时为测试功能，您可以将您的大会员cookie粘贴到根目录`setting.conf`文件`"cookie":"XXX"`的XXX中即可。您可以尝试使用`-c`, `--check`进行检查，若有问题欢迎发布**issues**与我进行讨论。如果我下个月开得了大会员我会将此功能完善的。🤞
+I have not opened a major member yet, so I have not conducted relevant tests. According to theory, as long as the cookie key-value pair of the access request contains requested by the major member, it can be downloaded. This function is temporarily a test function. You can paste your membership cookie into the XXX of the root directory `setting.conf` file `"cookie":"XXX"`. You can try to use `-c`, `--check` to check. If you have any questions, please post **issues** to discuss with me. If I get a big membership next month, I will complete this function. 🤞
 
-## 声明⚖
+## Declaration⚖
 
-本项目受GPL-3.0许可协议保护，所有程序仅用于学习与交流，请勿用于任何商业用途！
+This project is protected by the **GPL-3.0** license agreement, all programs are only used for learning and communication, please **DO NOT** use it for any commercial purposes!
 
-## 致谢🤝
+## Sponsor🤝
 
-💖💖如果您觉得此程序有用，请不吝留下一个**Star**或者**fork**呗，感激不尽！💖💖
-
+💖💖If you find this program useful, please don’t hesitate to leave a **Star** or **fork**, thank you very much!💖💖
