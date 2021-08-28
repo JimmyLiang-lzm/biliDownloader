@@ -62,6 +62,7 @@ class bili_downloader(object):
         # Get Html Information
         res = requests.get(self.index_url,headers=self.index_headers,stream=False)
         dec = res.content.decode('utf-8')
+        # Use RE to find Download JSON Data
         if re.findall(self.re_expression, dec, re.S) != []:
             video_name = re.findall(self.vname_expression, dec, re.S)[0].split('>')[1]
             video_name = self.name_replace(video_name)
@@ -123,97 +124,79 @@ class bili_downloader(object):
         else:
             print("尚未找到源地址，请检查网站地址或充值大会员！")
 
+    # Download Stream fuction
+    def d_processor(self,url_list,output_dir,dest):
+        for line in url_list:
+            print('使用线路：', line.split("?")[0])
+            try:
+                # video stream length sniffing
+                video_bytes = requests.get(line, headers=self.second_headers, stream=False)
+                vc_range = video_bytes.headers['Content-Range'].split('/')[1]
+                print("获取{}流范围为：{}".format(dest,vc_range))
+                print('{}文件大小：{} MB'.format(dest,round(float(vc_range) / self.chunk_size / 1024), 4))
+                # Get the full video stream
+                self.second_headers['range'] = 'bytes=0' + '-' + vc_range
+                m4sv_bytes = requests.get(line, headers=self.second_headers, stream=True)
+                pbar = tqdm(total=int(vc_range), initial=0, unit='b', leave=True, desc='正在'+dest, unit_scale=True)
+                with open(output_dir, 'ab') as f:
+                    for chunks in m4sv_bytes.iter_content(chunk_size=self.chunk_size):
+                        if chunks:
+                            f.write(chunks)
+                            pbar.update(self.chunk_size)
+                pbar.close()
+                print("{}成功！".format(dest))
+                break
+            except Exception as e:
+                print("{}出错：{}".format(dest,e))
+                os.remove(output_dir)
+
+    # Synthesis audio and video function
+    def ffmpeg_synthesis(self,input_v,input_a,output_add):
+        ffcommand = ""
+        if self.systemd == "windows":
+            ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
+            ffcommand = ffpath + '/ffmpeg.exe -i ' + input_v + ' -i ' + input_a + ' -c:v copy -c:a aac -strict experimental ' + output_add
+        elif self.systemd == "ubuntu":
+            ffcommand = 'ffmpeg -i' + input_v + ' -i ' + input_a + ' -c:v copy -c:a aac -strict experimental ' + output_add
+        else:
+            print("未知操作系统：无法确定FFMpeg命令。")
+            return -2
+        try:
+            if subprocess.call(ffcommand, shell=True):
+                raise Exception("{} 执行失败。".format(ffcommand))
+            print("视频合并完成！")
+            os.remove(input_v)
+            os.remove(input_a)
+        except Exception as e:
+            print("视频合成失败：", e)
 
     # For Download
     def download(self):
+        # Judge file whether exists
         if os.path.exists(self.output + '/down_video.m4s'):
             print("文件：{}\n已存在。".format(self.output + '/down_video.m4s'))
             return -1
         if os.path.exists(self.output + '/down_audio.m4s'):
             print("文件：{}\n已存在。".format(self.output + '/down_audio.m4s'))
             return -1
+        # Get video pre-detial
         flag,video_name,_,down_dic = self.search_preinfo()
-        # if os.path.exists(self.output + '/' + video_name + '.mp4'):
-        #     print("文件：{}\n已存在。",self.output + '/' + video_name + '.mp4')
         if flag:
             print("需要下载的视频：",video_name)
             # Perform video stream length sniffing
             self.second_headers['referer'] = self.index_url
             self.second_headers['range'] = down_dic["video"][self.VQuality][2]
             # Switch between main line and backup line(video).
-            for line in down_dic["video"][self.VQuality][1]:
-                print('使用线路：',line.split("?")[0])
-                try:
-                    # video stream length sniffing
-                    video_bytes = requests.get(line, headers=self.second_headers,stream=False)
-                    vc_range = video_bytes.headers['Content-Range'].split('/')[1]
-                    print("获取视频流范围为：", vc_range)
-                    print('视频文件大小：{} MB'.format(round(float(vc_range) / self.chunk_size / 1024), 4))
-                    # Get the full video stream
-                    self.second_headers['range'] = 'bytes=0' + '-' + vc_range
-                    m4sv_bytes = requests.get(line, headers=self.second_headers,stream=True)
-                    pbar = tqdm(total=int(vc_range), initial=0, unit='b', leave=True, desc='正在下载视频', unit_scale=True)
-                    with open(self.output + '/down_video.m4s', 'ab') as f:
-                        for chunks in m4sv_bytes.iter_content(chunk_size=self.chunk_size):
-                            if chunks:
-                                f.write(chunks)
-                                pbar.update(self.chunk_size)
-                    pbar.close()
-                    print("视频下载成功！")
-                    break
-                except Exception as e:
-                    print("视频下载出错：",e)
-                    os.remove(self.output + '/down_video.m4s')
+            self.d_processor(down_dic["video"][self.VQuality][1],self.output + '/down_video.m4s',"下载视频")
             # Perform audio stream length sniffing
-            self.second_headers['referer'] = self.index_url
             self.second_headers['range'] = down_dic["audio"][self.AQuality][2]
             # Switch between main line and backup line(audio).
-            for line in down_dic["audio"][self.AQuality][1]:
-                print('使用线路：', line.split("?")[0])
-                try:
-                    # video stream length sniffing
-                    audio_bytes = requests.get(line, headers=self.second_headers, stream=False)
-                    ac_range = audio_bytes.headers['Content-Range'].split('/')[1]
-                    print("获取视频流范围为：", ac_range)
-                    print("音频文件大小：{} MB".format(round(float(ac_range) / self.chunk_size / 1024), 4))
-                    # Get the full audio stream
-                    self.second_headers['range'] = 'bytes=0' + '-' + ac_range
-                    m4sa_bytes = requests.get(line, headers=self.second_headers, stream=True)
-                    pbar = tqdm(total=int(ac_range), initial=0, unit='b', leave=True, desc='正在下载音频', unit_scale=True)
-                    with open(self.output + '/down_audio.m4s', 'ab') as f:
-                        for chunks in m4sa_bytes.iter_content(chunk_size=self.chunk_size):
-                            if chunks:
-                                f.write(chunks)
-                                pbar.update(self.chunk_size)
-                    pbar.close()
-                    print("音频下载成功！")
-                    break
-                except Exception as e:
-                    print("音频下载出错：",e)
-                    os.remove(self.output + '/down_audio.m4s')
+            self.d_processor(down_dic["audio"][self.AQuality][1],self.output + '/down_audio.m4s',"下载音频")
             # Merge audio and video (USE FFMPEG)
             if self.synthesis:
-                input_v = self.output + '/down_video.m4s'
-                input_a = self.output + '/down_audio.m4s'
-                output_add = self.output + '/' + video_name + '.mp4'
                 print('正在启动ffmpeg......')
-                ffcommand = ""
-                if self.systemd == "windows":
-                    ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
-                    ffcommand = ffpath + '/ffmpeg.exe -i ' + input_v + ' -i ' + input_a + ' -c:v copy -c:a aac -strict experimental ' + output_add
-                elif self.systemd == "ubuntu":
-                    ffcommand = 'ffmpeg -i' + input_v + ' -i ' + input_a + ' -c:v copy -c:a aac -strict experimental ' + output_add
-                else:
-                    print("未知操作系统：无法确定FFMpeg命令。")
-                    return -2
-                try:
-                    if subprocess.call(ffcommand, shell=True):
-                        raise Exception("{} 执行失败。".format(ffcommand))
-                    print("视频合并完成！")
-                    os.remove(input_v)
-                    os.remove(input_a)
-                except Exception as e:
-                    print("视频合成失败：", e)
+                # Synthesis processor
+                self.ffmpeg_synthesis(self.output + '/down_video.m4s',self.output + '/down_audio.m4s',self.output + '/' + video_name + '.mp4')
         else:
             print("下载失败：尚未找到源地址，请检查网站地址或充值大会员！")
 
