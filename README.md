@@ -10,8 +10,8 @@
 4. 可自动合成视频，也可以进行音视频分离下载；
 5. 可通过探查获取不同清晰度的音视频流，并进行下载；
 6. 下载过程中若主下载线路阻塞，软件将自动选择备用线路进行下载；
-7. 可进行付费番剧或大会员高质量视频的下载（正处于测试阶段……）；
-8. 代码采用GPL-3.0许可协议保护。
+7. 可进行付费番剧或大会员高质量视频的下载（2021-10-06更新）；
+8. 可方便进行多集数与分P视频的下载。（2021-10-06更新）。
 
 ## 如何使用？🕹
 
@@ -54,6 +54,12 @@ python3 bili_Download.py -a HTTPAddress -c
 python3 bili_Download.py -a HTTPAddress -o OutputPath
 ```
 
+在进行多视频分集下载时，需要在下载视频的后尾增加`-l`与ListNUM参数，ListNUM由数字、‘,’与‘-’构成，例如`-l 1,3,5-9`其中数字代表指定下载的集数，通过半角逗号进行区分，通过横线可以指定下载视频5到视频9的全部分集：
+
+```shell
+python3 bili_Download.py -a HTTPAddress -o OutputPath -l ListNUM
+```
+
 ### 2. Windows系统环境下的安装与使用
 
 **安装：**
@@ -76,6 +82,12 @@ bili_Download.exe -a HTTPAddress -c
 bili_Download.exe -a HTTPAddress -o OutputPath
 ```
 
+在进行多视频分集下载时，需要在下载视频的后尾增加`-l`与ListNUM参数，ListNUM由数字、‘,’与‘-’构成，例如`-l 1,3,5-9`其中数字代表指定下载的集数，通过半角逗号进行区分，通过横线可以指定下载视频5到视频9的全部分集：
+
+```shell
+bili_Download.exe -a HTTPAddress -o OutputPath -l ListNUM
+```
+
 若不使用批处理脚本，则需要在`bili_Download.exe`前面加入**绝对地址**。
 
 ## 参数🛠
@@ -84,6 +96,7 @@ bili_Download.exe -a HTTPAddress -o OutputPath
 
 * `-a`, `--address`：输入视频页面的HTTP/HTTPS地址，若参数中不带有`-v`，`--version`，`-h`，`--help`时，此项为必填项；
 * `-o`, `--output`：下载视频到本地的输出文件夹地址，默认值为程序根目录；
+* `-l`, `--download-list`：下载的分集和分P视频列表，若选用则必须输入列表标号，例如“1,2,3-6”；
 * `-vq`, `--video-quality`：选择视频清晰度，接受数据类型为整数型数据，可使用`-c`或`--check`进行查看，默认值为**0**；
 * `-ar`, `--audio-quality`：选择音频清晰度，接受数据类型为整数型数据，可使用`-c`或`--check`进行查看，默认值为**0**；
 * `-s`, `--synthesis`：在视频下载完成后是否执行合成，仅支持输入`0`或`1`；其中`0`表示不进行合成，``1``表示进行合成；默认值为``1``；**此选项只有在完成FFMpeg部署之后才能实现！**
@@ -93,7 +106,7 @@ bili_Download.exe -a HTTPAddress -o OutputPath
 
 ## 关于大会员视频下载
 
-本人还未开通大会员，因此还未进行有关的测试，按理论来说，只要访问请求的cookie键值对中带有大会员请求的验证值，就可以进行下载。此功能暂时为测试功能，您可以将您的大会员cookie粘贴到根目录`setting.conf`文件`"cookie":"XXX"`的XXX中即可。您可以尝试使用`-c`, `--check`进行检查，若有问题欢迎发布**issues**与我进行讨论。如果我下个月开得了大会员我会将此功能完善的。🤞
+大会员视频下载已于**2021年10月6日更新**，您可以将您的大会员cookie粘贴到根目录`setting.conf`文件`"cookie":"XXX"`的XXX中即可。您可以尝试使用`-c`, `--check`进行检查。如何获取Cookie请[点击这里](https://jimmyliang-lzm.github.io/2021/10/05/Get_bilibili_cookie/)🤞
 
 ## 声明⚖
 
