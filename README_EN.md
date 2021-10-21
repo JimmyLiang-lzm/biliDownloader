@@ -10,8 +10,10 @@
 4. Automatically synthesize video, and also can separate audio and video for download;
 5. Can obtain audio and video streams of different definitions, and can be selectively downloaded;
 6. If the main download line is blocked during the download process, the software will automatically select the alternate line for downloading;
-7. Can download paid cartoon or VIP high-quality video (currently in the testing stage...);
-8. The code is protected by GPL-3.0 license agreement.
+7. Can download paid cartoon or VIP high-quality video (Updated 2021-10-06);
+8. Downloadable segmented video batches (Updated 2021-10-06);
+9. Downloadable interactive video (Updated 2021-10-22).
+
 
 ## How to use?🕹
 
@@ -88,12 +90,13 @@ In order to use this program correctly, the parameters are as follows:
 * `-ar`, `--audio-quality`: Select audio quality, accept data type as integer data, you can use `-c` or `--check` to view, the default value is **0**;
 * `-s`, `--synthesis`: Whether to perform synthesis after the video is downloaded, only `0` or `1` is supported. Among them, `0` means no synthesis, `1` means synthesis; the default value is ``1``; **this The option can only be realized after the deployment of FFMpeg!**
 * `-c`, `--check`: Check whether there are audio streams and video streams available for download on the video page, and display them; when this parameter appears, no video download will be performed;
+* `-i`, `--interact`: Download the entire interactive video;
 * `-v`, `--version`: View software version information;
 * `-h`, `--help`: Display software help information.
 
 ## About VIP video download
 
-I have not opened a major member yet, so I have not conducted relevant tests. According to theory, as long as the cookie key-value pair of the access request contains requested by the major member, it can be downloaded. This function is temporarily a test function. You can paste your membership cookie into the XXX of the root directory `setting.conf` file `"cookie":"XXX"`. You can try to use `-c`, `--check` to check. If you have any questions, please post **issues** to discuss with me. If I get a big membership next month, I will complete this function. 🤞
+VIP video download has been updated on **October 6, 2021**, you can paste your VIP cookie into the XXX of the root directory `setting.conf` file `"cookie":"XXX"`. You can try to use `-c`, `--check` to check. How to get cookies please [click here](https://jimmyliang-lzm.github.io/2021/10/05/Get_bilibili_cookie/)🤞
 
 ## Declaration⚖
 
