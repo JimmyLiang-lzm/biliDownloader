@@ -16,7 +16,7 @@ parser.add_argument('-ar','--audio-quality',dest='AudioQuality',type=int,default
 parser.add_argument('-s','--synthesis',dest='Synthesis',type=int,default=1,choices=[0,1],help='Perform video synthesis after downloading audio and video streams.\nYou HAVE TO make sure FFMPEG executable program is exist.')
 parser.add_argument('-i','--interact',action='store_true',help='For download interactive video.')
 parser.add_argument('-c','--check',action='store_true',help='Show video and audio download stream.')
-parser.add_argument('-v','--version',action='version',version='Bilibili Downloader == 1.0.0')
+parser.add_argument('-v','--version',action='version',version='Bilibili Downloader == 3.0')
 args = parser.parse_args()
 assert args.Address is not None
 #print(args)
