@@ -63,31 +63,50 @@ class bili_downloader(object):
 
     # Change /SS movie address
     def ssADDRCheck(self,inurl):
-        checking = re.findall('/play/ss',inurl.split("?")[0],re.S)
-        if checking != []:
+        checking1 = re.findall('/play/ss',inurl.split("?")[0],re.S)
+        checking2 = re.findall('/play/ep', inurl.split("?")[0], re.S)
+        if checking1 != []:
             res = requests.get(inurl, headers=self.index_headers, stream=False)
             dec = res.content.decode('utf-8')
             INITIAL_STATE = re.findall(self.re_INITIAL_STATE, dec, re.S)
             temp = json.loads(INITIAL_STATE[0])
             self.index_url = temp["mediaInfo"]["episodes"][0]["link"]
-            return temp["mediaInfo"]["episodes"][0]["link"]
+            return 1, temp["mediaInfo"]["episodes"][0]["link"]
+        elif checking2 != []:
+            return 1, inurl
         else:
-            return inurl
+            return 0, inurl
 
     # Searching Key Word
     def search_preinfo(self,index_url):
         # Get Html Information
         index_url = self.ssADDRCheck(index_url)
-        res = requests.get(index_url,headers=self.index_headers,stream=False)
+        res = requests.get(index_url[1],headers=self.index_headers,stream=False)
         dec = res.content.decode('utf-8')
         # Use RE to find Download JSON Data
         playinfo = re.findall(self.re_playinfo, dec, re.S)
         INITIAL_STATE = re.findall(self.re_INITIAL_STATE,dec,re.S)
         # If Crawler can GET Data
-        if playinfo != [] and INITIAL_STATE != []:
-            #print(playinfo[0])
-            re_init = json.loads(INITIAL_STATE[0])
-            re_GET = json.loads(playinfo[0])
+        if playinfo == [] or INITIAL_STATE == []:
+            print("Session等初始化信息获取失败。")
+            return 0, "", "", {}
+        re_init = json.loads(INITIAL_STATE[0])
+        re_GET = json.loads(playinfo[0])
+        if index_url[0] == 0:
+            now_cid = re_init["videoData"]["pages"][re_init["p"] - 1]["cid"]
+            try:
+                makeurl = "https://api.bilibili.com/x/player/playurl?cid=" + str(now_cid) + \
+                          "&qn=116&type=&otype=json&fourk=1&bvid=" + re_init["bvid"] + \
+                          "&fnver=0&fnval=976&session=" + re_GET["session"]
+                self.second_headers['referer'] = index_url[1]
+                res = requests.get(makeurl, headers=self.second_headers, stream=False, timeout=10)
+                re_GET = json.loads(res.content.decode('utf-8'))
+                # print(json.dumps(re_GET))
+            except Exception as e:
+                print("获取Playlist失败:", e)
+                return 0, "", "", {}
+        # If Crawler can GET Data
+        try:
             # Get video name
             vn1 = re.findall(self.vname_expression, dec, re.S)[0].split('>')[1]
             vn2 = ""
@@ -124,9 +143,10 @@ class bili_downloader(object):
             # Get Video Length
             length = re_GET["data"]["dash"]["duration"]
             # Return Data
-            return True,video_name,length,down_dic
-        else:
-            return None,"","",{}
+            return 1, video_name, length, down_dic
+        except Exception as e:
+            print("PreInfo:", e)
+            return 0, "", "", {}
 
     def search_videoList(self,index_url):
         res = requests.get(index_url, headers=self.index_headers, stream=False)
@@ -226,9 +246,9 @@ class bili_downloader(object):
         ffcommand = ""
         if self.systemd == "windows":
             ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
-            ffcommand = ffpath + '/ffmpeg.exe -i ' + input_v + ' -i ' + input_a + ' -c:v copy -c:a aac -strict experimental ' + output_add
+            ffcommand = ffpath + '/ffmpeg.exe -i ' + input_v + ' -i ' + input_a + ' -c:v copy -c:a copy -strict experimental ' + output_add
         elif self.systemd == "ubuntu":
-            ffcommand = 'ffmpeg -i' + input_v + ' -i ' + input_a + ' -c:v copy -c:a aac -strict experimental ' + output_add
+            ffcommand = 'ffmpeg -i' + input_v + ' -i ' + input_a + ' -c:v copy -c:a copy -strict experimental ' + output_add
         else:
             print("未知操作系统：无法确定FFMpeg命令。")
             return -2
@@ -242,7 +262,7 @@ class bili_downloader(object):
             print("视频合成失败：", e)
 
     # For Download Single Video
-    def Download_single(self,index=""):
+    def Download_single(self, index=""):
         # Get video pre-detial
         if index == "":
             flag, video_name, _, down_dic = self.search_preinfo(self.index_url)
@@ -265,11 +285,11 @@ class bili_downloader(object):
             self.second_headers['referer'] = index
             self.second_headers['range'] = down_dic["video"][self.VQuality][2]
             # Switch between main line and backup line(video).
-            self.d_processor(down_dic["video"][self.VQuality][1],video_dir,self.output,"下载视频")
+            self.d_processor(down_dic["video"][self.VQuality][1],self.output,video_dir,"下载视频")
             # Perform audio stream length sniffing
             self.second_headers['range'] = down_dic["audio"][self.AQuality][2]
             # Switch between main line and backup line(audio).
-            self.d_processor(down_dic["audio"][self.AQuality][1],audio_dir,self.output,"下载音频")
+            self.d_processor(down_dic["audio"][self.AQuality][1],self.output,audio_dir,"下载音频")
             # Merge audio and video (USE FFMPEG)
             if self.synthesis:
                 print('正在启动ffmpeg......')
