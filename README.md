@@ -40,7 +40,7 @@ pip3 install -r requirements.txt
    sudo apt install -y ffmpeg
    ```
 
-3. 更改初始化参数，进入根目录中的`setting.conf`文件中，将`"sys":"XXX"`中的`XXX`修改成你使用的系统平台。使用Windows平台时请修改为`windows`，使用Ubuntu平台时请修改为`ubuntu`。
+3. 更改初始化参数，进入根目录中的`setting.conf`文件中，将`"sys":"XXX"`中的`XXX`修改成你使用的系统平台。使用Windows平台时请修改为`windows`，使用Ubuntu平台时请修改为`unix`。
 
 **使用：**
 
