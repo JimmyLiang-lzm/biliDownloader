@@ -247,7 +247,7 @@ class bili_downloader(object):
         if self.systemd == "windows":
             ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
             ffcommand = ffpath + '/ffmpeg.exe -i ' + input_v + ' -i ' + input_a + ' -c:v copy -c:a copy -strict experimental ' + output_add
-        elif self.systemd == "ubuntu":
+        elif self.systemd == "unix":
             ffcommand = 'ffmpeg -i ' + input_v + ' -i  ' + input_a + ' -c:v copy -c:a copy -strict experimental ' + output_add
         else:
             print("未知操作系统：无法确定FFMpeg命令。")
