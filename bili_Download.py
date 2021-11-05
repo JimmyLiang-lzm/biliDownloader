@@ -260,6 +260,24 @@ class bili_downloader(object):
             os.remove(input_a)
         except Exception as e:
             print("视频合成失败：", e)
+    
+    def ffmpeg_convertmp3(self, input_a, output_add):
+        fcommand = input_a + ' -acodec mp3 ' + output_add
+        if self.systemd == "windows":
+            ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
+            ffcommand = ffpath + '/ffmpeg.exe -i ' + fcommand
+        elif self.systemd == "unix":
+            ffcommand = 'ffmpeg -i ' + fcommand
+        else:
+            print("未知操作系统：无法确定FFMpeg命令。")
+            return -2
+        try:
+            if subprocess.call(ffcommand, shell=True):
+                raise Exception("{} 执行失败。".format(ffcommand))
+            print("音频转换完成！")
+            os.remove(input_a)
+        except Exception as e:
+            print("音频转换失败：", e)
 
     # For Download Single Video
     def Download_single(self, index=""):
@@ -297,6 +315,41 @@ class bili_downloader(object):
                 self.ffmpeg_synthesis(video_dir,audio_dir,self.output + '/' + video_name + '.mp4')
         else:
             print("下载失败：尚未找到源地址，请检查网站地址或充值大会员！")
+
+    # Download Audio only
+    def Download_audio(self, index=""):
+        """
+            只是把Download_single里关于视频的删了
+        """
+        # Get video pre-detial
+        if index == "":
+            flag, video_name, _, down_dic = self.search_preinfo(self.index_url)
+            index = self.index_url
+        else:
+            flag, video_name, _, down_dic = self.search_preinfo(index)
+        # If we can access the video page
+        if flag:
+            # Judge file whether exists
+            audio_dir = self.output + '/' + video_name + '_audio.m4s'
+            if os.path.exists(audio_dir):
+                print("文件：{}\n已存在。".format(audio_dir))
+                return -1
+            print("需要下载的音频：",video_name)
+            # Perform audio stream length sniffing
+            self.second_headers['range'] = down_dic["audio"][self.AQuality][2]
+            # Switch between main line and backup line(audio).
+            self.d_processor(down_dic["audio"][self.AQuality][1],self.output,audio_dir,"下载音频")
+            # Convert audio into mp3 (USE FFMPEG)
+            if self.synthesis:
+                print('正在启动ffmpeg......')
+                # Synthesis processor
+                self.ffmpeg_convertmp3(audio_dir,self.output + '/' + video_name + '.mp3')
+        else:
+            print("下载失败：尚未找到源地址，请检查网站地址或充值大会员！")
+
+    # Downloads Cover only
+    def Download_cover():
+        pass
 
     # Args to List
     def args2list(self):
