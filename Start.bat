@@ -25,4 +25,4 @@ echo  -c, --check           Show video and audio download stream.
 echo  -v, --version         show program's version number and exit
 echo --------------------------------------------------------------------------------
 echo Please enter your command:
-cmd /k cd %cd%
+cmd /k cd %cd%\bili_Download

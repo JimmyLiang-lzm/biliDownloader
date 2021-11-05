@@ -12,7 +12,9 @@
 6. If the main download line is blocked during the download process, the software will automatically select the alternate line for downloading;
 7. Can download paid cartoon or VIP high-quality video (Updated 2021-10-06);
 8. Downloadable segmented video batches (Updated 2021-10-06);
-9. Downloadable interactive video (Updated 2021-10-22).
+9. Downloadable interactive video (Updated 2021-10-22);
+10. You can use IP proxy or SSR to remove regional resource access restrictions (Updated 2021-11-05);
+11. Add BiliBili music exploration and download function (Updated 2021-11-05).
 
 
 ## How to use?🕹
@@ -84,7 +86,8 @@ If you **DO NOT** use batch scripts, you need to add **absolute address** before
 
 In order to use this program correctly, the parameters are as follows:
 
-* `-a`, `--address`: Enter the HTTP/HTTPS address of the video page, if the parameter does not contain `-v`, `--version`, `-h`, `--help`, then this item is required;
+* `-a`, `--address`: Enter the HTTP/HTTPS address of the video page, if the parameter does not contain `-ma`, `--music-address`, `-v`, `--version`, `-h`, `--help`, then this item is required;
+* `-ma`, `--music-address`: Enter the HTTP/HTTPS address of the music page, if the parameter does not contain `-a`, `--address`, `-v`, `--version`, `-h`, `--help`, then this item is required;
 * `-o`, `--output`: Download the video to the local output folder address, the default value is the program root directory;
 * `-vq`, `--video-quality`: Select the video resolution, accept the data type as integer data, you can use `-c` or `--check` to view, the default value is **0**;
 * `-ar`, `--audio-quality`: Select audio quality, accept data type as integer data, you can use `-c` or `--check` to view, the default value is **0**;
@@ -97,6 +100,10 @@ In order to use this program correctly, the parameters are as follows:
 ## About VIP video download
 
 VIP video download has been updated on **October 6, 2021**, you can paste your VIP cookie into the XXX of the root directory `setting.conf` file `"cookie":"XXX"`. You can try to use `-c`, `--check` to check. How to get cookies please [click here](https://jimmyliang-lzm.github.io/2021/10/05/Get_bilibili_cookie/)🤞
+
+## Proxy IP settings
+
+Fill in your known proxy IP address and port number in the form of `http://(IP):(Port)` into the XXX of the root directory `setting.conf` file `"Proxy":"XXX"` , Such as `"Proxy":"http://127.0.0.1:1080"`.
 
 ## Declaration⚖
 

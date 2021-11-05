@@ -9,6 +9,7 @@ DF_Path = os.path.dirname(os.path.realpath(sys.argv[0]))
 
 parser = argparse.ArgumentParser(description='Bilibili Video Downloader')
 parser.add_argument('-a','--address',dest='Address',type=str,default=None,action='store',help='Input the HTTP/HTTPS address of video page.')
+parser.add_argument('-ma','--music-address',dest='MAddress',type=str,default=None,action='store',help='Input the HTTP/HTTPS address of music page.')
 parser.add_argument('-o','--output',dest='Output',type=str,default=DF_Path,action='store',help='Output folder location of Video(s).')
 parser.add_argument('-l','--download-list',dest='DownList',type=str,default=None,action='store',help='The List of Download partition video.')
 parser.add_argument('-vq','--video-quality',dest='VideoQuality',type=int,default=0,action='store',help='Videos quality. You can use "-c" or "--check" to view it, default is 0.')
@@ -16,15 +17,18 @@ parser.add_argument('-ar','--audio-quality',dest='AudioQuality',type=int,default
 parser.add_argument('-s','--synthesis',dest='Synthesis',type=int,default=1,choices=[0,1],help='Perform video synthesis after downloading audio and video streams.\nYou HAVE TO make sure FFMPEG executable program is exist.')
 parser.add_argument('-i','--interact',action='store_true',help='For download interactive video.')
 parser.add_argument('-c','--check',action='store_true',help='Show video and audio download stream.')
-parser.add_argument('-v','--version',action='version',version='Bilibili Downloader == 3.0')
+parser.add_argument('-v','--version',action='version',version='Bilibili Downloader == 3.1')
 args = parser.parse_args()
-assert args.Address is not None
+assert args.Address or args.MAddress is not None
 #print(args)
 
 class bili_downloader(object):
     # Parameter Initialize
     def __init__(self,args):
-        self.index_url = args.Address
+        if args.Address is None:
+            self.index_url = args.MAddress
+        else:
+            self.index_url = args.Address
         self.d_list = args.DownList
         self.VQuality = args.VideoQuality
         self.AQuality = args.AudioQuality
@@ -52,7 +56,10 @@ class bili_downloader(object):
             self.index_headers["cookie"] = tempr["cookie"]
             self.second_headers["cookie"] = tempr["cookie"]
             self.systemd = tempr["sys"]
-            f.close()
+            if tempr["Proxy"] != "":
+                self.Proxy = {'http': tempr["Proxy"],'https':tempr["Proxy"],}
+            else:
+                self.Proxy = {}
 
     # File name conflict replace
     def name_replace(self,name):
@@ -66,7 +73,7 @@ class bili_downloader(object):
         checking1 = re.findall('/play/ss',inurl.split("?")[0],re.S)
         checking2 = re.findall('/play/ep', inurl.split("?")[0], re.S)
         if checking1 != []:
-            res = requests.get(inurl, headers=self.index_headers, stream=False)
+            res = requests.get(inurl, headers=self.index_headers, stream=False,proxies=self.Proxy)
             dec = res.content.decode('utf-8')
             INITIAL_STATE = re.findall(self.re_INITIAL_STATE, dec, re.S)
             temp = json.loads(INITIAL_STATE[0])
@@ -81,7 +88,7 @@ class bili_downloader(object):
     def search_preinfo(self,index_url):
         # Get Html Information
         index_url = self.ssADDRCheck(index_url)
-        res = requests.get(index_url[1],headers=self.index_headers,stream=False)
+        res = requests.get(index_url[1],headers=self.index_headers,stream=False,proxies=self.Proxy)
         dec = res.content.decode('utf-8')
         # Use RE to find Download JSON Data
         playinfo = re.findall(self.re_playinfo, dec, re.S)
@@ -99,7 +106,7 @@ class bili_downloader(object):
                           "&qn=116&type=&otype=json&fourk=1&bvid=" + re_init["bvid"] + \
                           "&fnver=0&fnval=976&session=" + re_GET["session"]
                 self.second_headers['referer'] = index_url[1]
-                res = requests.get(makeurl, headers=self.second_headers, stream=False, timeout=10)
+                res = requests.get(makeurl, headers=self.second_headers, stream=False, timeout=10, proxies=self.Proxy)
                 re_GET = json.loads(res.content.decode('utf-8'))
                 # print(json.dumps(re_GET))
             except Exception as e:
@@ -149,7 +156,7 @@ class bili_downloader(object):
             return 0, "", "", {}
 
     def search_videoList(self,index_url):
-        res = requests.get(index_url, headers=self.index_headers, stream=False)
+        res = requests.get(index_url, headers=self.index_headers, stream=False, proxies=self.Proxy)
         dec = res.content.decode('utf-8')
         INITIAL_STATE = re.findall(self.re_INITIAL_STATE, dec, re.S)
         if INITIAL_STATE != []:
@@ -219,13 +226,13 @@ class bili_downloader(object):
             print('使用线路：', line.split("?")[0])
             try:
                 # video stream length sniffing
-                video_bytes = requests.get(line, headers=self.second_headers, stream=False)
+                video_bytes = requests.get(line, headers=self.second_headers, stream=False, proxies=self.Proxy)
                 vc_range = video_bytes.headers['Content-Range'].split('/')[1]
                 print("获取{}流范围为：{}".format(dest,vc_range))
                 print('{}文件大小：{} MB'.format(dest,round(float(vc_range) / self.chunk_size / 1024), 4))
                 # Get the full video stream
                 self.second_headers['range'] = 'bytes=0' + '-' + vc_range
-                m4sv_bytes = requests.get(line, headers=self.second_headers, stream=True)
+                m4sv_bytes = requests.get(line, headers=self.second_headers, stream=True, proxies=self.Proxy)
                 pbar = tqdm(total=int(vc_range), initial=0, unit='b', leave=True, desc='正在'+dest, unit_scale=True)
                 if not os.path.exists(output_dir):
                     os.makedirs(output_dir)
@@ -375,7 +382,7 @@ class bili_downloader(object):
     # Interactive video initial information
     def Get_Init_Info(self, url):
         try:
-            res = requests.get(url,headers=self.index_headers,stream=False)
+            res = requests.get(url,headers=self.index_headers,stream=False, proxies=self.Proxy)
             dec = res.content.decode('utf-8')
             playinfo = re.findall(self.re_playinfo, dec, re.S)
             INITIAL_STATE = re.findall(self.re_INITIAL_STATE, dec, re.S)
@@ -396,7 +403,7 @@ class bili_downloader(object):
     def isInteract(self):
         make_API = "https://api.bilibili.com/x/player/v2?cid=" + self.now_interact["cid"] + "&bvid=" + self.now_interact["bvid"]
         try:
-            res = requests.get(make_API,headers=self.index_headers,stream=False)
+            res = requests.get(make_API,headers=self.index_headers,stream=False,proxies=self.Proxy)
             des = json.loads(res.content.decode('utf-8'))
             if "interaction" not in des["data"]:
                 raise Exception("非交互视频")
@@ -412,7 +419,7 @@ class bili_downloader(object):
                    + "&bvid=" + self.now_interact["bvid"] + "&qn=116&type=&otype=json&fourk=1&fnver=0&fnval=976&session=" + \
                    self.now_interact["session"]
         try:
-            des = requests.get(make_API, headers=self.index_headers, stream=False)
+            des = requests.get(make_API, headers=self.index_headers, stream=False, proxies=self.Proxy)
             playinfo = json.loads(des.content.decode('utf-8'))
         except Exception as e:
             return False, str(e)
@@ -459,7 +466,7 @@ class bili_downloader(object):
             make_API = "https://api.bilibili.com/x/stein/nodeinfo?bvid=" + self.now_interact["bvid"] + "&graph_version=" + self.now_interact["graph_version"]
         else:
             make_API = "https://api.bilibili.com/x/stein/nodeinfo?bvid=" + self.now_interact["bvid"] + "&graph_version=" + self.now_interact["graph_version"] + "&node_id=" + self.now_interact["node_id"]
-        des = requests.get(make_API, headers=self.index_headers, stream=False)
+        des = requests.get(make_API, headers=self.index_headers, stream=False, proxies=self.Proxy)
         desp = json.loads(des.content.decode('utf-8'))
         if "edges" not in desp["data"]:
             return temp
@@ -492,14 +499,172 @@ class bili_downloader(object):
             self.recursion_for_Download(json_list[ch]["choices"],output)
         return 0
 
+    ###################################################################
+    # 音频进程
+    def search_AUPreinfo(self, au_url):
+        # check1:音乐歌单页面检测；check2:单个音乐页面检测
+        check1 = re.findall(r'/audio/am(\d+)', au_url, re.S)
+        check2 = re.findall(r'/audio/au(\d+)', au_url, re.S)
+        if check1 != []:
+            # print(check1[0])
+            temps = self.AuList_Maker(check1[0], 2)
+            if temps[0]:
+                # print(json.dumps(temps[1]))
+                return 1, temps[1]
+            else:
+                return 0, "Audio List Get Error."
+        elif check2 != []:
+            # print(check2[0])
+            temps = self.AuList_Maker(check2[0], 1)
+            if temps[0]:
+                # print(json.dumps(temps[1]))
+                return 2, temps[1]
+            else:
+                return 0, "Audio Single Get Error."
+        else:
+            print("Is NOT Music.")
+            return 0, {}
+
+    def AuList_Maker(self, sid, modeNUM):
+        list_dict = {"audio": [], "total": 0}
+        if modeNUM == 1:
+            try:
+                makeURL = "https://www.bilibili.com/audio/music-service-c/web/song/info?sid=" + sid
+                res = requests.get(makeURL, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+                des = res.content.decode('utf-8')
+                auinfo = json.loads(des)["data"]
+                temp = {}
+                temp["title"] = auinfo["title"] + "_" + auinfo["author"]
+                temp["sid"] = sid
+                temp["cover"] = auinfo["cover"]
+                temp["duration"] = auinfo["duration"]
+                temp["lyric"] = auinfo["lyric"]
+                list_dict["audio"].append(temp)
+                list_dict["total"] = 1
+            except Exception as e:
+                print("AuList_Maker_Single:", e)
+                return 0, "AuList_Maker_Single:{}".format(e)
+            return 1, list_dict
+        elif modeNUM == 2:
+            try:
+                pn = 1
+                while True:
+                    makeURL = "https://www.bilibili.com/audio/music-service-c/web/song/of-menu?sid=" + sid + "&pn=" + str(
+                        pn) + "&ps=30"
+                    res = requests.get(makeURL, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+                    des = res.content.decode('utf-8')
+                    mu_dic = json.loads(des)["data"]
+                    for sp in mu_dic["data"]:
+                        # print(sp)
+                        temp = {}
+                        temp["title"] = sp["title"] + "_" + sp["author"]
+                        temp["sid"] = str(sp["id"])
+                        temp["cover"] = sp["cover"]
+                        temp["duration"] = sp["duration"]
+                        temp["lyric"] = sp["lyric"]
+                        list_dict["audio"].append(temp)
+                        list_dict["total"] += 1
+                    if pn >= mu_dic["pageCount"]:
+                        break
+                    else:
+                        pn += 1
+                        continue
+            except Exception as e:
+                print("AuList_Maker_List:", e)
+                return 0, "AuList_Maker_List:{}".format(e)
+            return 1, list_dict
+        else:
+            return 0, "ModeNum Error."
+
+    # 显示音频信息
+    def Audio_Show(self):
+        au_dic = self.search_AUPreinfo(self.index_url)
+        if au_dic[0] == 0:
+            print(au_dic[1])
+            return 0
+        if au_dic[0] == 1:
+            print('当前歌单包含音乐数量为{}个'.format(au_dic[1]["total"]))
+        elif au_dic[0] == 2:
+            print('当前下载歌曲名称为：{}'.format(au_dic[1]["audio"][0]["title"]))
+            print('歌曲长度为：{}'.format(au_dic[1]["audio"][0]["duration"]))
+        else:
+            return 0
+        i = 0
+        for sp in au_dic[1]["audio"]:
+            i += 1
+            form_make = "{}-->{}".format(i, sp["title"])
+            print(form_make)
+        return 1
+
+    # 获取单个音频下载地址
+    def Audio_getDownloadList(self, sid):
+        make_url = "https://www.bilibili.com/audio/music-service-c/web/url?sid=" + sid
+        res = requests.get(make_url, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+        des = res.content.decode('utf-8')
+        au_list = json.loads(des)["data"]["cdns"]
+        return au_list
+
+    # 附带资源下载
+    def simple_downloader(self, url, output_dir, output_file):
+        try:
+            res = requests.get(url, headers=self.index_headers, timeout=10, proxies=self.Proxy)
+            file = res.content
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            with open(output_file, 'wb') as f:
+                f.write(file)
+        except Exception as e:
+            print("附带下载失败：", e)
+
+    # 音乐下载函数
+    def audio_downloader(self):
+        self.second_headers["referer"] = "https://www.bilibili.com/"
+        self.second_headers["sec-fetch-dest"] = 'audio'
+        self.second_headers["sec-fetch-mode"] = 'no-cors'
+        self.AQuality = 0
+        self.VQuality = 0
+        if self.d_list != None:
+            d_list = self.args2list()
+        else:
+            d_list = [1]
+        temp_dic = self.search_AUPreinfo(self.index_url)
+        if temp_dic[0] == 0:
+            print("获取音乐前置信息出错。")
+            return 0
+        try:
+            for index in d_list:
+                sp = temp_dic[1]["audio"][index - 1]
+                output_dir = self.output + "/" + self.name_replace(sp["title"])
+                output_name = output_dir + "/" + self.name_replace(sp["title"])
+                print("正在下载音乐：{}".format(sp["title"]))
+                if sp["cover"] != "":
+                    self.simple_downloader(sp["cover"], output_dir, output_name + "_封面.jpg")
+                if sp["lyric"] != "":
+                    self.simple_downloader(sp["lyric"], output_dir, output_name + "_歌词.lrc")
+                au_downlist = self.Audio_getDownloadList(sp["sid"])
+                self.second_headers["range"] = 'bytes=0-'
+                self.d_processor(au_downlist, output_dir, output_name + ".mp3", "下载音乐")
+            print("音乐下载进程结束！")
+            return 1
+        except Exception as e:
+            print("音频下载出错：", e)
+            return 0
+
 
 if __name__ == '__main__':
     rundownloader = bili_downloader(args)
     if args.check:
-        rundownloader.show_preDetail()
-    elif args.DownList != None:
+        if args.Address is None:
+            rundownloader.Audio_Show()
+        else:
+            rundownloader.show_preDetail()
+    elif args.DownList != None and args.Address != None:
         rundownloader.Download_List()
-    elif args.interact:
+    elif args.interact and args.Address != None:
         rundownloader.requests_start()
-    else:
+    elif args.Address != None:
         rundownloader.Download_single()
+    elif args.MAddress != None:
+        rundownloader.audio_downloader()
+    else:
+        pass

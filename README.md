@@ -13,7 +13,9 @@
 6. 下载过程中若主下载线路阻塞，软件将自动选择备用线路进行下载；
 7. 可进行付费番剧或大会员高质量视频的下载（2021-10-06更新）；
 8. 可方便进行多集数与分P视频的下载（2021-10-06更新）；
-9. 可下载交互视频（2021-10-21更新）。
+9. 可下载交互视频（2021-10-21更新）；
+10. 可在配置文件中设置代理IP访问“仅限港澳台地区”视频（2021-11-05更新）；
+11. 增加B站音乐探查与下载功能（2021-11-05更新）。
 
 ## 如何使用？🕹
 
@@ -96,7 +98,8 @@ bili_Download.exe -a HTTPAddress -o OutputPath -l ListNUM
 
 为了能正确使用本程序，参数如下：
 
-* `-a`, `--address`：输入视频页面的HTTP/HTTPS地址，若参数中不带有`-v`，`--version`，`-h`，`--help`时，此项为必填项；
+* `-a`, `--address`：输入视频页面的HTTP/HTTPS地址，若参数中不带有`-ma`，`--music-address`，`-v`，`--version`，`-h`，`--help`时，此项为必填项；
+* `-ma`, `--music-address`：输入音频页面的HTTP/HTTPS地址，若参数中不带有`-a`，`--address`，`-v`，`--version`，`-h`，`--help`时，此项为必填项；
 * `-o`, `--output`：下载视频到本地的输出文件夹地址，默认值为程序根目录；
 * `-l`, `--download-list`：下载的分集和分P视频列表，若选用则必须输入列表标号，例如“1,2,3-6”；
 * `-vq`, `--video-quality`：选择视频清晰度，接受数据类型为整数型数据，可使用`-c`或`--check`进行查看，默认值为**0**；
@@ -110,6 +113,10 @@ bili_Download.exe -a HTTPAddress -o OutputPath -l ListNUM
 ## 关于大会员视频下载
 
 大会员视频下载已于**2021年10月6日更新**，您可以将您的大会员cookie粘贴到根目录`setting.conf`文件`"cookie":"XXX"`的XXX中即可。您可以尝试使用`-c`, `--check`进行检查。如何获取Cookie请[点击这里](https://jimmyliang-lzm.github.io/2021/10/05/Get_bilibili_cookie/)🤞
+
+## 代理IP设置
+
+将您已知的代理IP地址和端口号以`http://(IP):(Port)`形式填入根目录`setting.conf`文件`"Proxy":"XXX"`的XXX中即可，例如`"Proxy":"http://127.0.0.1:1080"`。
 
 ## 声明⚖
 
