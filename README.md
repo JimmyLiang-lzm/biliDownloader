@@ -94,6 +94,10 @@ bili_Download.exe -a HTTPAddress -o OutputPath -l ListNUM
 
 若不使用批处理脚本，则需要在`bili_Download.exe`前面加入**绝对地址**。
 
+### 3. 其他
+
+利用Google Colab下载视频（免安装但要配合科学上网）：[<img src="https://colab.research.google.com/assets/colab-badge.svg" align="center">](https://colab.research.google.com/drive/1_t-MXomiiyvHehWh_2ExzuEeAbU8culF)
+
 ## 参数🛠
 
 为了能正确使用本程序，参数如下：
