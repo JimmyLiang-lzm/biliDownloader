@@ -17,7 +17,7 @@ parser.add_argument('-ar','--audio-quality',dest='AudioQuality',type=int,default
 parser.add_argument('-s','--synthesis',dest='Synthesis',type=int,default=1,choices=[0,1],help='Perform video synthesis after downloading audio and video streams.\nYou HAVE TO make sure FFMPEG executable program is exist.')
 parser.add_argument('-i','--interact',action='store_true',help='For download interactive video.')
 parser.add_argument('-c','--check',action='store_true',help='Show video and audio download stream.')
-parser.add_argument('-v','--version',action='version',version='Bilibili Downloader == 3.1')
+parser.add_argument('-v','--version',action='version',version='Bilibili Downloader == 4.0')
 args = parser.parse_args()
 assert args.Address or args.MAddress is not None
 #print(args)
@@ -134,8 +134,9 @@ class bili_downloader(object):
                 if str(dic["id"]) in temp_v:
                     qc = temp_v[str(dic["id"])]
                     down_dic["video"][i] = [qc, [dic["baseUrl"]], 'bytes=' + dic["SegmentBase"]["Initialization"]]
-                    for a in range(len(dic["backupUrl"])):
-                        down_dic["video"][i][1].append(dic["backupUrl"][a])
+                    if dic["backupUrl"] != None:
+                        for a in range(len(dic["backupUrl"])):
+                            down_dic["video"][i][1].append(dic["backupUrl"][a])
                     i += 1
                 else:
                     continue
@@ -144,8 +145,9 @@ class bili_downloader(object):
             for dic in re_GET["data"]["dash"]["audio"]:
                 au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
                 down_dic["audio"][i] = [au_stream, [dic["baseUrl"]],'bytes=' + dic["SegmentBase"]["Initialization"]]
-                for a in range(len(dic["backupUrl"])):
-                    down_dic["audio"][i][1].append(dic["backupUrl"][a])
+                if dic["backupUrl"] != None:
+                    for a in range(len(dic["backupUrl"])):
+                        down_dic["audio"][i][1].append(dic["backupUrl"][a])
                 i += 1
             # Get Video Length
             length = re_GET["data"]["dash"]["duration"]
@@ -437,8 +439,9 @@ class bili_downloader(object):
                 if str(dic["id"]) in temp_v:
                     qc = temp_v[str(dic["id"])]
                     down_dic["video"][i] = [qc, [dic["baseUrl"]], 'bytes=' + dic["SegmentBase"]["Initialization"]]
-                    for a in range(len(dic["backupUrl"])):
-                        down_dic["video"][i][1].append(dic["backupUrl"][a])
+                    if dic["backupUrl"] != None:
+                        for a in range(len(dic["backupUrl"])):
+                            down_dic["video"][i][1].append(dic["backupUrl"][a])
                     i += 1
                 else:
                     continue
@@ -447,8 +450,9 @@ class bili_downloader(object):
             for dic in re_GET["data"]["dash"]["audio"]:
                 au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
                 down_dic["audio"][i] = [au_stream, [dic["baseUrl"]], 'bytes=' + dic["SegmentBase"]["Initialization"]]
-                for a in range(len(dic["backupUrl"])):
-                    down_dic["audio"][i][1].append(dic["backupUrl"][a])
+                if dic["backupUrl"] != None:
+                    for a in range(len(dic["backupUrl"])):
+                        down_dic["audio"][i][1].append(dic["backupUrl"][a])
                 i += 1
             # Get Video Length
             length = re_GET["data"]["dash"]["duration"]
