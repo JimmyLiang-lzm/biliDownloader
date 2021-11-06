@@ -1,3 +1,11 @@
+# 相较于原版不一样增加的功能
+增加了-ao选项，可以选择直接下载音频，并且会直接合并视频封面作为音频封面。
+
+```shell
+python3 bili_Download.py -a HTTPAddress -ao
+```
+
+# ·以下是原版bili_download提供的readme·
 # bilibili弹幕网视频下载器😀
 
 [![maven](https://img.shields.io/badge/Python-3.8.8-blue.svg)](https://www.python.org/)  [![mavel](https://img.shields.io/badge/GPL-3.0-red.svg)](https://github.com/JimmyLiang-lzm/biliDownloader/blob/master/LICENSE) ![mavel](https://img.shields.io/badge/requests-2.26.0-green.svg) ![mavel](https://img.shields.io/badge/tqdm-4.62.1-green.svg) 
