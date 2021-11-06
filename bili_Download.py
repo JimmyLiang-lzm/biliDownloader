@@ -379,11 +379,14 @@ class bili_downloader(object):
 			self.d_processor(
 				down_dic["audio"][self.AQuality][1], self.output, audio_dir, "下载音频")
 			# Convert audio into mp3 (USE FFMPEG)
-			if self.synthesis:
-				print('正在启动ffmpeg......')
-				# Synthesis processor
-				self.ffmpeg_convertmp3(
-					audio_dir, self.output + '/' + video_name + '.mp3')
+			print('正在启动ffmpeg......')
+			# Synthesis processor
+			self.ffmpeg_convertmp3(
+				audio_dir, self.output + '/' + video_name + '.mp3')
+			import eyed3
+			mysong = eyed3.load(self.output + '/' + video_name + '.mp3')
+			mysong.tag.images.set(3, self.Download_cover(), "image/jpeg")
+			mysong.tag.save()
 		else:
 			print("下载失败：尚未找到源地址，请检查网站地址或充值大会员！")
 
