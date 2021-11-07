@@ -162,6 +162,7 @@ class bili_downloader(object):
 					continue
 			# List Audio Stream
 			i = 0
+			# re_GET["data"]["dash"]["audio"].sort(key=lambda t:t.bandwidth)
 			for dic in re_GET["data"]["dash"]["audio"]:
 				au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
 				down_dic["audio"][i] = [au_stream, [dic["baseUrl"]],
@@ -380,15 +381,21 @@ class bili_downloader(object):
 				down_dic["audio"][self.AQuality][1], self.output, audio_dir, "下载音频")
 			# Convert audio into mp3 (USE FFMPEG)
 			print('正在启动ffmpeg......')
-			# Synthesis processor
+			# Convert audio m4s into mp3
 			self.ffmpeg_convertmp3(
 				audio_dir, self.output + '/' + video_name + '.mp3')
-			import eyed3
-			mysong = eyed3.load(self.output + '/' + video_name + '.mp3')
-			mysong.tag.images.set(3, self.Download_cover(), "image/jpeg")
-			mysong.tag.save()
+			# Merge cover image to mp3 if exist
+			cover_bytes = self.Download_cover()
+			if cover_bytes:
+				self.Merge_cover(cover_bytes)
 		else:
 			print("下载失败：尚未找到源地址，请检查网站地址或充值大会员！")
+
+	def Merge_cover(self, cover:bytes) -> None:
+		import eyed3
+		mysong = eyed3.load(self.output + '/' + video_name + '.mp3')
+		mysong.tag.images.set(3, cover, "image/jpeg")
+		mysong.tag.save()
 
 	# Downloads Cover only
 	def Download_cover(self) -> bytes:
