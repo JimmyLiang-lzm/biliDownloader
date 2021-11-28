@@ -14,6 +14,10 @@ type = 'mp3' if args.AudioMP3 else 'm4a'
 with open(sys.path[0] + r"/downloadlist.txt", "r") as listtxt:
     for i in listtxt.readlines():
         try:
+            os.path.exists(sys.path[0]+r"/download")
+        except FileNotFoundError :
+            os.mkdir(sys.path[0]+r"/download")
+        try:
             os.system(
                 "python3 "
                 + sys.path[0]
