@@ -135,6 +135,7 @@ class bili_downloader(object):
 		try:
 			# Get video name
 			vn1 = re.findall(self.vname_expression, dec, re.S)[0].split('>')[1]
+			vn1 = vn1.replace('_哔哩哔哩_bilibili', '')
 			vn2 = ""
 			if "videoData" in re_init:
 				vn2 = re_init["videoData"]["pages"][re_init["p"]-1]["part"]
@@ -142,7 +143,7 @@ class bili_downloader(object):
 				vn2 = re_init["epInfo"]["titleFormat"] + \
 					":" + re_init["epInfo"]["longTitle"]
 			video_name = self.name_replace(
-				vn1) + "_[" + self.name_replace(vn2) + "]"
+				vn1) + "[" + self.name_replace(vn2) + "]"
 			video_name = html.unescape(video_name)
 			# List Video Quality Table
 			temp_v = {}
