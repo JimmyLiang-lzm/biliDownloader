@@ -67,7 +67,7 @@ class bili_downloader(object):
 			tempr = json.loads(f.read())
 			self.index_headers["cookie"] = tempr["cookie"]
 			self.second_headers["cookie"] = tempr["cookie"]
-			self.systemd = tempr["sys"]
+			self.systemd = sys.platform
 			f.close()
 
 	# File name conflict replace
@@ -280,11 +280,11 @@ class bili_downloader(object):
 	# Synthesis audio and video function
 	def ffmpeg_synthesis(self, input_v, input_a, output_add):
 		ffcommand = ""
-		if self.systemd == "windows":
+		if self.systemd == "win32":
 			ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
 			ffcommand = ffpath + '/ffmpeg.exe -i ' + input_v + ' -i ' + \
 				input_a + ' -c:v copy -c:a copy -strict experimental ' + output_add
-		elif self.systemd == "unix":
+		elif self.systemd in ["linux","darwin"]:
 			ffcommand = 'ffmpeg -i ' + input_v + ' -i  ' + input_a + \
 				' -c:v copy -c:a copy -strict experimental ' + output_add
 		else:
@@ -301,10 +301,10 @@ class bili_downloader(object):
 
 	def ffmpeg_convertmp3(self, input_a, output_add):
 		fcommand = '"'+input_a+'"' + ' -loglevel quiet -acodec mp3 ' + '"'+output_add+'"'
-		if self.systemd == "windows":
+		if self.systemd == "win32":
 			ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
-			ffcommand = 'ffmpeg.exe -i ' + fcommand
-		elif self.systemd == "unix":
+			ffcommand = ffpath + '/ffmpeg.exe -i ' + fcommand
+		elif self.systemd in ["linux","darwin"]:
 			ffcommand = 'ffmpeg -i ' + fcommand
 		else:
 			print("未知操作系统：无法确定FFMpeg命令。")
