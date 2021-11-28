@@ -31,7 +31,7 @@ parser.add_argument('-c', '--check', action='store_true',
 					help='Show video and audio download stream.')
 parser.add_argument('-mp3', '--audio-mp3', dest='AudioMP3',
 					action='store_true', help='download mp3 Audio Only')
-parser.add_argument('-m4a', '--audio-m4a', dest='AudioM4A',
+parser.add_argument('-m4a', '--audio-aac', dest='AudioM4A',
 					action='store_true', help='download m4a Audio Only')					
 parser.add_argument('-v', '--version', action='version',
 					version='Bilibili Downloader == 3.0')
@@ -302,8 +302,11 @@ class bili_downloader(object):
 		except Exception as e:
 			print("视频合成失败：", e)
 
-	def ffmpeg_convertmp3(self, input_a, output_add):
-		fcommand = '"'+input_a+'"' + ' -loglevel quiet -acodec mp3 ' + '"'+output_add+'"'
+	def ffmpeg_convertmp3(self, input_a, output_add, type):
+		if type == 'mp3':
+			fcommand = '"'+input_a+'"' + ' -loglevel quiet -c:a mp3 "'+output_add+r'.mp3"'
+		elif type == 'm4a':
+			fcommand = '"'+input_a+'"' + ' -loglevel quiet -c:a alac "'+output_add+r'.m4a"'
 		if self.systemd == "win32":
 			ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
 			ffcommand = ffpath + r'/ffmpeg.exe -i ' + fcommand
@@ -390,16 +393,12 @@ class bili_downloader(object):
 				down_dic["audio"][self.AQuality][1], self.output, audio_dir, "下载音频")
 			# Convert audio into mp3 (USE FFMPEG)
 			# Convert audio m4s into mp3
-			if type=='mp3':
-				self.ffmpeg_convertmp3(
-					audio_dir, self.output + r'/' + self.video_name + '.mp3')
-			elif type=='m4a':
-				os.rename(audio_dir, self.output + r'/' + self.video_name+'.m4a')
+			self.ffmpeg_convertmp3(audio_dir, self.output + r'/' + self.video_name, type)
 			# Merge cover image to mp3 if exist
 			cover_bytes = self.Download_cover()
 			if cover_bytes:
 				try:
-					self.Merge_cover(type,cover_bytes)
+					self.Merge_cover(type, cover_bytes)
 				except NotImplementedError:
 					os.remove(audio_dir[:-10]+'.'+type)
 		else:
