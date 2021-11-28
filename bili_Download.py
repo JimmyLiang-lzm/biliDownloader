@@ -104,7 +104,7 @@ class bili_downloader(object):
 		playinfo = re.findall(self.re_playinfo, dec, re.S)
 		# Get the url of video cover, add to self
 		try:
-			self.cover_url = re.findall(r"http://i2.hdslb.com/bfs/archive/.*?\.jpg", res.text)[0]
+			self.cover_url = re.findall(r"http://i..hdslb.com/bfs/archive/.*?\.jpg", res.text)[0]
 		except Exception as e:
 			self.cover_url = None
 			print("获取封面失败:", e)
@@ -301,7 +301,7 @@ class bili_downloader(object):
 		fcommand = input_a + ' -acodec mp3 ' + output_add
 		if self.systemd == "windows":
 			ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
-			ffcommand = ffpath + '/ffmpeg.exe -i ' + fcommand
+			ffcommand = 'ffmpeg.exe -i ' + fcommand
 		elif self.systemd == "unix":
 			ffcommand = 'ffmpeg -i ' + fcommand
 		else:
@@ -319,22 +319,22 @@ class bili_downloader(object):
 	def Download_single(self, index=""):
 		# Get video pre-detial
 		if index == "":
-			flag, video_name, _, down_dic = self.search_preinfo(self.index_url)
+			flag, self.video_name, _, down_dic = self.search_preinfo(self.index_url)
 			index = self.index_url
 		else:
-			flag, video_name, _, down_dic = self.search_preinfo(index)
+			flag, self.video_name, _, down_dic = self.search_preinfo(index)
 		# If we can access the video page
 		if flag:
 			# Judge file whether exists
-			video_dir = self.output + '/' + video_name + '_video.m4s'
-			audio_dir = self.output + '/' + video_name + '_audio.m4s'
+			video_dir = self.output + '/' + self.video_name + '_video.m4s'
+			audio_dir = self.output + '/' + self.video_name + '_audio.m4s'
 			if os.path.exists(video_dir):
 				print("文件：{}\n已存在。".format(video_dir))
 				return -1
 			if os.path.exists(audio_dir):
 				print("文件：{}\n已存在。".format(audio_dir))
 				return -1
-			print("需要下载的视频：", video_name)
+			print("需要下载的视频：", self.video_name)
 			# Perform video stream length sniffing
 			self.second_headers['referer'] = index
 			self.second_headers['range'] = down_dic["video"][self.VQuality][2]
@@ -351,7 +351,7 @@ class bili_downloader(object):
 				print('正在启动ffmpeg......')
 				# Synthesis processor
 				self.ffmpeg_synthesis(
-					video_dir, audio_dir, self.output + '/' + video_name + '.mp4')
+					video_dir, audio_dir, self.output + '/' + self.video_name + '.mp4')
 		else:
 			print("下载失败：尚未找到源地址，请检查网站地址或充值大会员！")
 
@@ -362,18 +362,18 @@ class bili_downloader(object):
 		"""
 		# Get video pre-detial
 		if index == "":
-			flag, video_name, _, down_dic = self.search_preinfo(self.index_url)
+			flag, self.video_name, _, down_dic = self.search_preinfo(self.index_url)
 			index = self.index_url
 		else:
-			flag, video_name, _, down_dic = self.search_preinfo(index)
+			flag, self.video_name, _, down_dic = self.search_preinfo(index)
 		# If we can access the video page
 		if flag:
 			# Judge file whether exists
-			audio_dir = self.output + '/' + video_name + '_audio.m4s'
+			audio_dir = self.output + '/' + self.video_name + '_audio.m4s'
 			if os.path.exists(audio_dir):
 				print("文件：{}\n已存在。".format(audio_dir))
 				return -1
-			print("需要下载的音频：", video_name)
+			print("需要下载的音频：", self.video_name)
 			# Perform audio stream length sniffing
 			self.second_headers['range'] = down_dic["audio"][self.AQuality][2]
 			# Switch between main line and backup line(audio).
@@ -383,7 +383,7 @@ class bili_downloader(object):
 			print('正在启动ffmpeg......')
 			# Convert audio m4s into mp3
 			self.ffmpeg_convertmp3(
-				audio_dir, self.output + '/' + video_name + '.mp3')
+				audio_dir, self.output + '/' + self.video_name + '.mp3')
 			# Merge cover image to mp3 if exist
 			cover_bytes = self.Download_cover()
 			if cover_bytes:
@@ -393,8 +393,13 @@ class bili_downloader(object):
 
 	def Merge_cover(self, cover:bytes) -> None:
 		import eyed3
-		mysong = eyed3.load(self.output + '/' + video_name + '.mp3')
+		mysong = eyed3.load(self.output + '/' + self.video_name + '.mp3')
 		mysong.tag.images.set(3, cover, "image/jpeg")
+		mysong.tag.artist = "A-Soul"
+		mysong.tag.title = self.video_name
+		mysong.tag.album = u"A-Soul翻唱合集"
+		mysong.tag.comments.set("来源:"+self.index_url)
+
 		mysong.tag.save()
 
 	# Downloads Cover only
