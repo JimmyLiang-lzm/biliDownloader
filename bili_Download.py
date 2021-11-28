@@ -300,7 +300,7 @@ class bili_downloader(object):
 			print("视频合成失败：", e)
 
 	def ffmpeg_convertmp3(self, input_a, output_add):
-		fcommand = '"'+input_a+'"' + ' -acodec mp3 ' + '"'+output_add+'"'
+		fcommand = '"'+input_a+'"' + ' -loglevel quiet -acodec mp3 ' + '"'+output_add+'"'
 		if self.systemd == "windows":
 			ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
 			ffcommand = 'ffmpeg.exe -i ' + fcommand
