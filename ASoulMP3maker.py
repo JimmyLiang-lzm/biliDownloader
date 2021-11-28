@@ -17,7 +17,9 @@ with open(sys.path[0] + r"/downloadlist.txt", "r") as listtxt:
             os.system(
                 "python3 "
                 + sys.path[0]
-                + r"/bili_Download.py -"
+                + r"/bili_Download.py -o"
+                + sys.path[0]
+                + '/download -'
                 + type
                 + ' -a '
                 + i

@@ -53,7 +53,6 @@ class bili_downloader(object):
 		self.re_INITIAL_STATE = 'window.__INITIAL_STATE__=([\s\S]*?);\(function'
 		self.vname_expression = '<title(.*?)</title>'
 		self.chunk_size = 1024
-		self.errorlist = {}
 		self.index_headers = {
 			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"
 		}
@@ -281,7 +280,6 @@ class bili_downloader(object):
 			except Exception as e:
 				print("{}出错：{}".format(dest, e))
 				os.remove(output_dir)
-
 	# Synthesis audio and video function
 	def ffmpeg_synthesis(self, input_v, input_a, output_add):
 		ffcommand = ""
@@ -396,16 +394,14 @@ class bili_downloader(object):
 				self.ffmpeg_convertmp3(
 					audio_dir, self.output + r'/' + self.video_name + '.mp3')
 			elif type=='m4a':
-				os.rename(audio_dir, self.video_name+'.m4a')
+				os.rename(audio_dir, self.output + r'/' + self.video_name+'.m4a')
 			# Merge cover image to mp3 if exist
 			cover_bytes = self.Download_cover()
 			if cover_bytes:
 				try:
 					self.Merge_cover(type,cover_bytes)
 				except NotImplementedError:
-					print('网络错误'+self.video_name+'下载失败')
-					os.remove(audio_dir[:-10]+type)
-					self.errorlist[self.video_name] = self.index_url
+					os.remove(audio_dir[:-10]+'.'+type)
 		else:
 			print("下载失败：尚未找到源地址，请检查网站地址或充值大会员！")
 
@@ -647,6 +643,4 @@ if __name__ == '__main__':
 		rundownloader.requests_start()
 	else:
 		rundownloader.Download_single()
-	if rundownloader.errorlist:
-		print('这些文件下载失败了')
-		print(json.dumps(rundownloader.errorlist, indent=4))
+
