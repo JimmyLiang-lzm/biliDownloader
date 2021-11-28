@@ -4,6 +4,7 @@ import argparse
 import requests
 import re
 import json
+import html
 from tqdm import tqdm
 import subprocess
 
@@ -141,6 +142,7 @@ class bili_downloader(object):
 					":" + re_init["epInfo"]["longTitle"]
 			video_name = self.name_replace(
 				vn1) + "_[" + self.name_replace(vn2) + "]"
+			video_name = html.unescape(video_name)
 			# List Video Quality Table
 			temp_v = {}
 			for i in range(len(re_GET["data"]["accept_quality"])):
@@ -298,7 +300,7 @@ class bili_downloader(object):
 			print("视频合成失败：", e)
 
 	def ffmpeg_convertmp3(self, input_a, output_add):
-		fcommand = input_a + ' -acodec mp3 ' + output_add
+		fcommand = '"'+input_a+'"' + ' -acodec mp3 ' + '"'+output_add+'"'
 		if self.systemd == "windows":
 			ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
 			ffcommand = 'ffmpeg.exe -i ' + fcommand
@@ -397,7 +399,7 @@ class bili_downloader(object):
 		mysong.tag.images.set(3, cover, "image/jpeg")
 		mysong.tag.artist = "A-Soul"
 		mysong.tag.title = self.video_name
-		mysong.tag.album = u"A-Soul翻唱合集"
+		mysong.tag.album = u"A-Soul唱过的歌"
 		mysong.tag.comments.set("来源:"+self.index_url)
 
 		mysong.tag.save()
