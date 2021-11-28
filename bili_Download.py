@@ -310,6 +310,7 @@ class bili_downloader(object):
 			print("未知操作系统：无法确定FFMpeg命令。")
 			return -2
 		try:
+			print('启动ffmpeg:\n'+ffcommand)
 			if subprocess.call(ffcommand, shell=True):
 				raise Exception("{} 执行失败。".format(ffcommand))
 			print("音频转换完成！")
@@ -371,10 +372,13 @@ class bili_downloader(object):
 		# If we can access the video page
 		if flag:
 			# Judge file whether exists
-			audio_dir = self.output + '/' + self.video_name + '_audio.m4s'
-			if os.path.exists(audio_dir):
-				print("文件：{}\n已存在。".format(audio_dir))
+			audio_dir = self.output + '\\' + self.video_name + '_audio.m4s'
+			if os.path.exists(audio_dir[:-10]+'.mp3'):
+				print("mp3文件：{}\n已存在,跳过下载。".format(audio_dir))
 				return -1
+			if os.path.exists(audio_dir):
+				print("临时文件：{}\n已存在,删除后重新下载。".format(audio_dir))
+				os.remove(audio_dir)
 			print("需要下载的音频：", self.video_name)
 			# Perform audio stream length sniffing
 			self.second_headers['range'] = down_dic["audio"][self.AQuality][2]
@@ -382,7 +386,6 @@ class bili_downloader(object):
 			self.d_processor(
 				down_dic["audio"][self.AQuality][1], self.output, audio_dir, "下载音频")
 			# Convert audio into mp3 (USE FFMPEG)
-			print('正在启动ffmpeg......')
 			# Convert audio m4s into mp3
 			self.ffmpeg_convertmp3(
 				audio_dir, self.output + '/' + self.video_name + '.mp3')
