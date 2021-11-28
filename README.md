@@ -1,12 +1,29 @@
-# A-Soul版增加的功能
+## 项目介绍
 
-使用前请先将当前工作目录转到ASoulMP3maker，安装好需要的需要的环境
+为了方便下载的ASoul唱过的歌，并且在MP3或者iTunes里能有一个好看的封面和完善的歌曲信息，本项目在[JimmyLiang-lzm/biliDownloader（基于版本:5f61cae5fa016c591f57a5553fe6faf9fddf6493）](https://github.com/JimmyLiang-lzm/biliDownloader)的基础上增加修改了一些功能，完成了一个专用于下载A-Soul成员在B站上的投稿视频并转换为带标签MP3的工具。
+
+>   不知道提供下载会不会构成侵权，先给小伙伴们说一声对不起🙇←🏃
+
+## ASoulMP3maker
+
+### 安装
+
+在python的3.8和3.9下测试通过，理论上python3都可以用，使用前请先安装对应的python库并切换工作目录。
 
 ```shell
+cd ASoulMP3maker
 pip install -r requirements.txt
 ```
 
-## 增加了-ao选项，可以选择直接下载音频，并且会直接合并视频封面作为音频封面。
+-   **Windows部署**：
+    1. 需要手动进行**FFMpeg**程序的下载，👉[点击这里](http://ffmpeg.org/download.html)👈进入官网进行下载。
+    1. 将下载的压缩包解压后，复制压缩文件中的`ffmpeg.exe`并粘贴到`ASoulMP3maker`程序根目录下即可。
+-   **Linux和Mac OS部署**：
+    1.   借助apt、brew等包管理工具安装。
+
+### 使用
+
+#### 下载单个视频并转换
 
 ```shell
 python3 bili_Download.py -a [HTTPAddress] -ao
@@ -15,9 +32,9 @@ python3 bili_Download.py -a [HTTPAddress] -ao
 
 2.   在某一次更新中增加了补充歌手名称和专辑名称功能。将歌手名固定为A-Soul，专辑名为《A-Soul唱过的歌》，并在歌曲的注释信息中添加了下载的来源地址。
 
-<img src="https://i.loli.net/2021/11/28/TSIRH25DmjUX8po.png" alt="image-20211128141922577" style="zoom: 80%;" />
+<img src="https://i.loli.net/2021/11/28/TSIRH25DmjUX8po.png" alt="image-20211128141922577" style="zoom: 33%;" />
 
-## 增加了批量音乐下载功能
+#### 批量下载
 
 将需要下载的视频链接写在downloadlist.txt中，再运行下面的命令，就能将音频下载到当前目录下的download文件夹中。
 ```shell
@@ -25,126 +42,23 @@ python3 txt-download.py
 ```
 > 作者在downloadlist.txt中添加了几首歌作为测试，正式使用前可以删掉
 
-# ·以下是原版bili_download提供的readme·
+#### 其他相关
 
-# bilibili弹幕网视频下载器😀
+1.   **音质**：似乎B站推流出来默认就是最高音质优先，我测试了一下下载的都是最高码率音频。如果有问题请提issue。
+2.   **流量**：只消耗打开b站网页版的流量和下载音频的流量，不产生下载视频画面的流量。
 
-[![maven](https://img.shields.io/badge/Python-3.8.8-blue.svg)](https://www.python.org/)  [![mavel](https://img.shields.io/badge/GPL-3.0-red.svg)](https://github.com/JimmyLiang-lzm/biliDownloader/blob/master/LICENSE) ![mavel](https://img.shields.io/badge/requests-2.26.0-green.svg) ![mavel](https://img.shields.io/badge/tqdm-4.62.1-green.svg) 
-  [![maven](https://img.shields.io/badge/BiliDownloader-GUI-pink.svg)](https://github.com/JimmyLiang-lzm/biliDownloader_GUI)  [![mavel](https://img.shields.io/badge/README-EN-blue.svg)](https://github.com/JimmyLiang-lzm/biliDownloader/blob/master/README_EN.md)
 
-## 特性✨
 
-1. 本程序基于`Python 3.8.8`进行编写，代码可读性强，易于移植；
-2. 可使用参数直接进行控制，方便与服务器环境下使用；
-3. 仅需一句代码即可进行视频下载，省略繁琐的操作；
-4. 可自动合成视频，也可以进行音视频分离下载；
-5. 可通过探查获取不同清晰度的音视频流，并进行下载；
-6. 下载过程中若主下载线路阻塞，软件将自动选择备用线路进行下载；
-7. 可进行付费番剧或大会员高质量视频的下载（2021-10-06更新）；
-8. 可方便进行多集数与分P视频的下载（2021-10-06更新）；
-9. 可下载交互视频（2021-10-21更新）。
+#### 原版下载器的功能
 
-## 如何使用？🕹
+修改过程中保留了[JimmyLiang-lzm/biliDownloader（版本:5f61cae5fa016c591f57a5553fe6faf9fddf6493）](https://github.com/JimmyLiang-lzm/biliDownloader)中的所用功能，可以查看对应版本的[README.md](https://github.com/JimmyLiang-lzm/biliDownloader/blob/91752cf232125e0d25ebc902d3c8abc2e9ebb2b3/README.md)使用。
 
-### 1. Python环境下的安装和使用
+>   原版中的系统类型选项改为自动判断，不需要手动填写。
 
-**安装**：
+## 感谢
 
-1. 首先确保你的Python版本为3.8.8或以上，随后按照以下代码进行环境构建；
+谢谢[JimmyLiang-lzm/biliDownloader)](https://github.com/JimmyLiang-lzm/biliDownloader)完成的基础工作。
 
-```shell
-git clone https://github.com/JimmyLiang-lzm/biliDownloader.git
-cd biliDownloader
-pip3 install -r requirements.txt
-```
-
-2. 进行**FFMpeg**程序的下载，👉[点击这里](http://ffmpeg.org/download.html)👈进入官网进行下载：
-
-   * **Windows部署**：将下载的压缩包解压后，复制压缩文件中的`ffmpeg.exe`并粘贴到`biliDownloader`程序根目录下即可。
-   * **Ubuntu部署**：可利用以下代码进行简单安装，若需要使用比较新的版本，请进入官网下载并且编译。
-
-   ```shell
-   sudo add-apt-repository -y ppa:djcj/hybrid
-   sudo apt update
-   sudo apt install -y ffmpeg
-   ```
-
-3. 更改初始化参数，进入根目录中的`setting.conf`文件中，将`"sys":"XXX"`中的`XXX`修改成你使用的系统平台。使用Windows平台时请修改为`windows`，使用Ubuntu平台时请修改为`ubuntu`。
-
-**使用：**
-
-若要检查视频下载地址，可直接使用以下代码进行查看，其中`HTTPAddress`代表网页地址：
-
-```shell
-python3 bili_Download.py -a HTTPAddress -c
-```
-
-若要进行视频下载，可直接使用以下代码进行下载，`OutputPath`代表输出文件夹：
-
-```shell
-python3 bili_Download.py -a HTTPAddress -o OutputPath
-```
-
-在进行多视频分集下载时，需要在下载视频的后尾增加`-l`与ListNUM参数，ListNUM由数字、‘,’与‘-’构成，例如`-l 1,3,5-9`其中数字代表指定下载的集数，通过半角逗号进行区分，通过横线可以指定下载视频5到视频9的全部分集：
-
-```shell
-python3 bili_Download.py -a HTTPAddress -o OutputPath -l ListNUM
-```
-
-### 2. Windows系统环境下的安装与使用
-
-**安装：**
-
-1. 进入本项目**release**中进行下载，下载完成后进行解压；
-2. 进行**FFMpeg**程序的下载，👉[点击这里](https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-2021-08-14-git-acd079843b-full_build.7z)👈进行下载，解压后将"bin->ffmpeg.exe"解压到"bili_Download"文件夹中。
-3. 更改初始化参数，打开根目录`bili_Download`文件夹中的`setting.conf`文件，将`"sys":"XXX"`中的`XXX`修改成`windows`。
-
-**使用：**
-
-为了方便在Windows系统中进行使用，请点击解压目录中的`Start.bat`批处理脚本，若要检查视频下载地址，可直接使用以下代码进行查看，其中`HTTPAddress`代表网页地址：
-
-```shell
-bili_Download.exe -a HTTPAddress -c
-```
-
-若要进行视频下载，可直接使用以下代码进行下载，`OutputPath`代表输出文件夹：
-
-```shell
-bili_Download.exe -a HTTPAddress -o OutputPath
-```
-
-在进行多视频分集下载时，需要在下载视频的后尾增加`-l`与ListNUM参数，ListNUM由数字、‘,’与‘-’构成，例如`-l 1,3,5-9`其中数字代表指定下载的集数，通过半角逗号进行区分，通过横线可以指定下载视频5到视频9的全部分集：
-
-```shell
-bili_Download.exe -a HTTPAddress -o OutputPath -l ListNUM
-```
-
-若不使用批处理脚本，则需要在`bili_Download.exe`前面加入**绝对地址**。
-
-## 参数🛠
-
-为了能正确使用本程序，参数如下：
-
-* `-a`, `--address`：输入视频页面的HTTP/HTTPS地址，若参数中不带有`-v`，`--version`，`-h`，`--help`时，此项为必填项；
-* `-o`, `--output`：下载视频到本地的输出文件夹地址，默认值为程序根目录；
-* `-l`, `--download-list`：下载的分集和分P视频列表，若选用则必须输入列表标号，例如“1,2,3-6”；
-* `-vq`, `--video-quality`：选择视频清晰度，接受数据类型为整数型数据，可使用`-c`或`--check`进行查看，默认值为**0**；
-* `-ar`, `--audio-quality`：选择音频清晰度，接受数据类型为整数型数据，可使用`-c`或`--check`进行查看，默认值为**0**；
-* `-s`, `--synthesis`：在视频下载完成后是否执行合成，仅支持输入`0`或`1`；其中`0`表示不进行合成，``1``表示进行合成；默认值为``1``；**此选项只有在完成FFMpeg部署之后才能实现！**
-* `-c`, `--check`：检查视频页面是否有可用于下载的音频流与视频流，并显示出来；当此参数出现时，将不会进行视频下载；
-* `-i`, `--interact`：下载整个交互视频；
-* `-v`, `--version`：查看软件版本信息；
-* `-h`, `--help`：显示软件帮助信息。
-
-## 关于大会员视频下载
-
-大会员视频下载已于**2021年10月6日更新**，您可以将您的大会员cookie粘贴到根目录`setting.conf`文件`"cookie":"XXX"`的XXX中即可。您可以尝试使用`-c`, `--check`进行检查。如何获取Cookie请[点击这里](https://jimmyliang-lzm.github.io/2021/10/05/Get_bilibili_cookie/)🤞
-
-## 声明⚖
+## 声明
 
 本项目受GPL-3.0许可协议保护，所有程序仅用于学习与交流，请勿用于任何商业用途！
-
-## 致谢🤝
-
-💖💖如果您觉得此程序有用，请不吝留下一个**Star**或者**fork**呗，感激不尽！💖💖
-
