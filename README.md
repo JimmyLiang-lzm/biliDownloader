@@ -26,11 +26,15 @@ pip install -r requirements.txt
 #### 下载单个视频并转换
 
 ```shell
-python3 bili_Download.py -a [HTTPAddress] -ao
+python3 bili_Download.py -a [HTTPAddress] -mp3
+# 或者
+python3 bili_Download.py -a [HTTPAddress] -m4a
 ```
 1.   将`[HTTPAddress]`换成你要下载的视频地址，如`https://www.bilibili.com/video/BV1ER4y1E7qn`
 
-2.   在某一次更新中增加了补充歌手名称和专辑名称功能。将歌手名固定为A-Soul，专辑名为《A-Soul唱过的歌》，并在歌曲的注释信息中添加了下载的来源地址。
+2.  在某一次更新中增加了补充歌手名称和专辑名称功能。将歌手名固定为A-Soul，专辑名为《A-Soul唱过的歌》，并在歌曲的注释信息中添加了下载的来源地址。
+
+3. 参数的m4a和mp3用来控制下载音频文件的类型
 
 <img src="https://i.loli.net/2021/11/28/TSIRH25DmjUX8po.png" alt="image-20211128141922577" style="zoom: 33%;" />
 
@@ -38,7 +42,9 @@ python3 bili_Download.py -a [HTTPAddress] -ao
 
 将需要下载的视频链接写在downloadlist.txt中，再运行下面的命令，就能将音频下载到当前目录下的download文件夹中。
 ```shell
-python3 ASoulMP3maker.py
+python3 ASoulMP3maker.py -mp3
+# 或者
+python3 ASoulMP3maker.py -m4a
 ```
 > 作者在downloadlist.txt中添加了几首歌作为测试，正式使用前可以删掉
 

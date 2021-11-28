@@ -29,8 +29,10 @@ parser.add_argument('-i', '--interact', action='store_true',
 					help='For download interactive video.')
 parser.add_argument('-c', '--check', action='store_true',
 					help='Show video and audio download stream.')
-parser.add_argument('-ao', '--audio-only', dest='AudioOnly',
-					action='store_true', help='download Audio Only')
+parser.add_argument('-mp3', '--audio-mp3', dest='AudioMP3',
+					action='store_true', help='download mp3 Audio Only')
+parser.add_argument('-m4a', '--audio-m4a', dest='AudioM4A',
+					action='store_true', help='download m4a Audio Only')					
 parser.add_argument('-v', '--version', action='version',
 					version='Bilibili Downloader == 3.0')
 args = parser.parse_args()
@@ -312,7 +314,7 @@ class bili_downloader(object):
 			print("未知操作系统：无法确定FFMpeg命令。")
 			return -2
 		try:
-			print('启动ffmpeg:\n'+ffcommand)
+			print('启动ffmpeg:\t'+ffcommand)
 			if subprocess.call(ffcommand, shell=True):
 				raise Exception("{} 执行失败。".format(ffcommand))
 			print("音频转换完成！")
@@ -361,7 +363,7 @@ class bili_downloader(object):
 			print("下载失败：尚未找到源地址，请检查网站地址或充值大会员！")
 
 	# Download Audio only
-	def Download_audio(self, index=""):
+	def Download_audio(self, index="", type="m4a"):
 		"""
 			只是把Download_single里关于视频的删了
 		"""
@@ -375,8 +377,8 @@ class bili_downloader(object):
 		if flag:
 			# Judge file whether exists
 			audio_dir = self.output + r'/' + self.video_name + '_audio.m4s'
-			if os.path.exists(audio_dir[:-10]+'.mp3'):
-				print("mp3文件：{}\n已存在,跳过下载。".format(audio_dir))
+			if os.path.exists(audio_dir[:-10]+r'.'+type):
+				print("音频文件：{}\n已存在,跳过下载。".format(audio_dir))
 				return -1
 			if os.path.exists(audio_dir):
 				print("临时文件：{}\n已存在,删除后重新下载。".format(audio_dir))
@@ -389,25 +391,27 @@ class bili_downloader(object):
 				down_dic["audio"][self.AQuality][1], self.output, audio_dir, "下载音频")
 			# Convert audio into mp3 (USE FFMPEG)
 			# Convert audio m4s into mp3
-			self.ffmpeg_convertmp3(
-				audio_dir, self.output + r'/' + self.video_name + '.mp3')
+			if type=='mp3':
+				self.ffmpeg_convertmp3(
+					audio_dir, self.output + r'/' + self.video_name + '.mp3')
+			elif type=='m4a':
+				os.rename(audio_dir, self.video_name+'.m4a')
 			# Merge cover image to mp3 if exist
 			cover_bytes = self.Download_cover()
 			if cover_bytes:
-				self.Merge_cover(cover_bytes)
+					self.Merge_cover(type,cover_bytes)
 		else:
 			print("下载失败：尚未找到源地址，请检查网站地址或充值大会员！")
 
-	def Merge_cover(self, cover:bytes) -> None:
-		import eyed3
-		mysong = eyed3.load(self.output + r'/' + self.video_name + '.mp3')
-		mysong.tag.images.set(3, cover, "image/jpeg")
-		mysong.tag.artist = "A-Soul"
-		mysong.tag.title = self.video_name
-		mysong.tag.album = u"A-Soul唱过的歌"
-		mysong.tag.comments.set("来源:"+self.index_url)
-
-		mysong.tag.save()
+	def Merge_cover(self, type,cover:bytes) -> None:
+		import music_tag
+		mysong = music_tag.load_file(self.output + r'/' + self.video_name + r'.' +type)
+		mysong['artwork'] = cover
+		mysong['title'] = self.video_name
+		mysong['artist'] = "A-Soul"
+		mysong['album'] = u"A-Soul唱过的歌"
+		mysong['comment'] = "来源："+self.index_url
+		mysong.save()
 
 	# Downloads Cover only
 	def Download_cover(self) -> bytes:
@@ -627,8 +631,10 @@ if __name__ == '__main__':
 	rundownloader = bili_downloader(args)
 	if args.check:
 		rundownloader.show_preDetail()
-	elif args.AudioOnly:
-		rundownloader.Download_audio()
+	elif args.AudioMP3:
+		rundownloader.Download_audio(type='mp3')
+	elif args.AudioM4A:
+		rundownloader.Download_audio(type='m4a')
 	elif args.DownList != None:
 		rundownloader.Download_List()
 	elif args.interact:
