@@ -38,7 +38,7 @@ python3 bili_Download.py -a [HTTPAddress] -ao
 
 将需要下载的视频链接写在downloadlist.txt中，再运行下面的命令，就能将音频下载到当前目录下的download文件夹中。
 ```shell
-python3 txt-download.py
+python3 ASoulMP3maker.py
 ```
 > 作者在downloadlist.txt中添加了几首歌作为测试，正式使用前可以删掉
 
