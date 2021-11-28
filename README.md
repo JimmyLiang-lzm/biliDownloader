@@ -1,11 +1,32 @@
-# 相较于原版不一样增加的功能
-增加了-ao选项，可以选择直接下载音频，并且会直接合并视频封面作为音频封面。
+# A-Soul版增加的功能
+
+使用前请先将当前工作目录转到ASoulMP3maker，安装好需要的需要的环境
 
 ```shell
-python3 bili_Download.py -a HTTPAddress -ao
+pip install -r requirements.txt
 ```
 
+## 增加了-ao选项，可以选择直接下载音频，并且会直接合并视频封面作为音频封面。
+
+```shell
+python3 bili_Download.py -a [HTTPAddress] -ao
+```
+1.   将`[HTTPAddress]`换成你要下载的视频地址，如`https://www.bilibili.com/video/BV1ER4y1E7qn`
+
+2.   在某一次更新中增加了补充歌手名称和专辑名称功能。将歌手名固定为A-Soul，专辑名为《A-Soul唱过的歌》，并在歌曲的注释信息中添加了下载的来源地址。
+
+<img src="https://i.loli.net/2021/11/28/TSIRH25DmjUX8po.png" alt="image-20211128141922577" style="zoom: 80%;" />
+
+## 增加了批量音乐下载功能
+
+将需要下载的视频链接写在downloadlist.txt中，再运行下面的命令，就能将音频下载到当前目录下的download文件夹中。
+```shell
+python3 txt-download.py
+```
+> 作者在downloadlist.txt中添加了几首歌作为测试，正式使用前可以删掉
+
 # ·以下是原版bili_download提供的readme·
+
 # bilibili弹幕网视频下载器😀
 
 [![maven](https://img.shields.io/badge/Python-3.8.8-blue.svg)](https://www.python.org/)  [![mavel](https://img.shields.io/badge/GPL-3.0-red.svg)](https://github.com/JimmyLiang-lzm/biliDownloader/blob/master/LICENSE) ![mavel](https://img.shields.io/badge/requests-2.26.0-green.svg) ![mavel](https://img.shields.io/badge/tqdm-4.62.1-green.svg) 
