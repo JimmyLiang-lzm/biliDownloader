@@ -2,6 +2,7 @@
 import os
 import sys
 import argparse
+import time
 
 parser = argparse.ArgumentParser(description='Asoul\'s song Downloader')
 parser.add_argument('-mp3', '--audio-mp3', dest='AudioMP3',
@@ -13,9 +14,10 @@ type = 'mp3' if args.AudioMP3 else 'm4a'
 
 with open(sys.path[0] + r"/downloadlist.txt", "r") as listtxt:
     for i in listtxt.readlines():
+        time.sleep(3)
         try:
             os.path.exists(sys.path[0]+r"/download")
-        except FileNotFoundError :
+        except FileNotFoundError:
             os.mkdir(sys.path[0]+r"/download")
         try:
             os.system(
