@@ -1,21 +1,22 @@
+# This Python file uses the following encoding: utf-8
 import os, sys
 
-with open(sys.path[0] + "\\downloadlist.txt", "r") as listtxt:
+with open(sys.path[0] + r"/downloadlist.txt", "r") as listtxt:
     for i in listtxt.readlines():
         try:
-            os.path.exists(sys.path[0]+"./download")
+            os.path.exists(sys.path[0]+r"/download")
         except FileNotFoundError :
-            os.mkdir(sys.path[0]+"./download")
+            os.mkdir(sys.path[0]+r"/download")
         try:
             os.system(
-                "python "
+                "python3 "
                 + sys.path[0]
-                + "\\bili_Download.py -ao -o "
+                + r"/bili_Download.py -ao -o "
                 + sys.path[0]
-                + "/download/ -a "
+                + r"/download/ -a "
                 + i
             )
         except Exception as e:
             print(e)
         print("*" * 40)
-    print("全下载完啦")
+    print("finished")

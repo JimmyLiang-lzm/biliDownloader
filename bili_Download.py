@@ -1,3 +1,4 @@
+# This Python file uses the following encoding: utf-8
 import os
 import sys
 import argparse
@@ -282,7 +283,7 @@ class bili_downloader(object):
 		ffcommand = ""
 		if self.systemd == "win32":
 			ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
-			ffcommand = ffpath + '/ffmpeg.exe -i ' + input_v + ' -i ' + \
+			ffcommand = ffpath + r'/ffmpeg.exe -i ' + input_v + ' -i ' + \
 				input_a + ' -c:v copy -c:a copy -strict experimental ' + output_add
 		elif self.systemd in ["linux","darwin"]:
 			ffcommand = 'ffmpeg -i ' + input_v + ' -i  ' + input_a + \
@@ -303,7 +304,7 @@ class bili_downloader(object):
 		fcommand = '"'+input_a+'"' + ' -loglevel quiet -acodec mp3 ' + '"'+output_add+'"'
 		if self.systemd == "win32":
 			ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
-			ffcommand = ffpath + '/ffmpeg.exe -i ' + fcommand
+			ffcommand = ffpath + r'/ffmpeg.exe -i ' + fcommand
 		elif self.systemd in ["linux","darwin"]:
 			ffcommand = 'ffmpeg -i ' + fcommand
 		else:
@@ -329,8 +330,8 @@ class bili_downloader(object):
 		# If we can access the video page
 		if flag:
 			# Judge file whether exists
-			video_dir = self.output + '/' + self.video_name + '_video.m4s'
-			audio_dir = self.output + '/' + self.video_name + '_audio.m4s'
+			video_dir = self.output + r'/' + self.video_name + '_video.m4s'
+			audio_dir = self.output + r'/' + self.video_name + '_audio.m4s'
 			if os.path.exists(video_dir):
 				print("文件：{}\n已存在。".format(video_dir))
 				return -1
@@ -354,7 +355,7 @@ class bili_downloader(object):
 				print('正在启动ffmpeg......')
 				# Synthesis processor
 				self.ffmpeg_synthesis(
-					video_dir, audio_dir, self.output + '/' + self.video_name + '.mp4')
+					video_dir, audio_dir, self.output + r'/' + self.video_name + '.mp4')
 		else:
 			print("下载失败：尚未找到源地址，请检查网站地址或充值大会员！")
 
@@ -372,7 +373,7 @@ class bili_downloader(object):
 		# If we can access the video page
 		if flag:
 			# Judge file whether exists
-			audio_dir = self.output + '\\' + self.video_name + '_audio.m4s'
+			audio_dir = self.output + r'/' + self.video_name + '_audio.m4s'
 			if os.path.exists(audio_dir[:-10]+'.mp3'):
 				print("mp3文件：{}\n已存在,跳过下载。".format(audio_dir))
 				return -1
@@ -388,7 +389,7 @@ class bili_downloader(object):
 			# Convert audio into mp3 (USE FFMPEG)
 			# Convert audio m4s into mp3
 			self.ffmpeg_convertmp3(
-				audio_dir, self.output + '/' + self.video_name + '.mp3')
+				audio_dir, self.output + r'/' + self.video_name + '.mp3')
 			# Merge cover image to mp3 if exist
 			cover_bytes = self.Download_cover()
 			if cover_bytes:
@@ -398,7 +399,7 @@ class bili_downloader(object):
 
 	def Merge_cover(self, cover:bytes) -> None:
 		import eyed3
-		mysong = eyed3.load(self.output + '/' + self.video_name + '.mp3')
+		mysong = eyed3.load(self.output + r'/' + self.video_name + '.mp3')
 		mysong.tag.images.set(3, cover, "image/jpeg")
 		mysong.tag.artist = "A-Soul"
 		mysong.tag.title = self.video_name
@@ -616,7 +617,7 @@ class bili_downloader(object):
 			if self.synthesis:
 				print('正在启动ffmpeg......')
 				self.ffmpeg_synthesis(
-					video_dir, audio_dir, output + '/' + chn + '.mp4')
+					video_dir, audio_dir, output + r'/' + chn + '.mp4')
 			self.recursion_for_Download(json_list[ch]["choices"], output)
 		return 0
 
