@@ -2,6 +2,7 @@
 import os
 import sys
 import argparse
+from mutagen.mp3 import BitrateMode
 import requests
 import re
 import json
@@ -23,10 +24,6 @@ parser.add_argument('-vq', '--video-quality', dest='VideoQuality', type=int, def
                     action='store', help='Videos quality. You can use "-c" or "--check" to view it, default is 0.')
 parser.add_argument('-ar', '--audio-quality', dest='AudioQuality', type=int, default=0,
                     action='store', help='Audio quality. You can use "-c" or "--check" to view it, default is 0.')
-parser.add_argument('-s', '--synthesis', dest='Synthesis', type=int, default=1, choices=[
-    0, 1], help='Perform video synthesis after downloading audio and video streams.\nYou HAVE TO make sure FFMPEG executable program is exist.')
-parser.add_argument('-i', '--interact', action='store_true',
-                    help='For download interactive video.')
 parser.add_argument('-c', '--check', action='store_true',
                     help='Show video and audio download stream.')
 parser.add_argument('-mp3', '--audio-mp3', dest='AudioMP3',
@@ -34,7 +31,7 @@ parser.add_argument('-mp3', '--audio-mp3', dest='AudioMP3',
 parser.add_argument('-m4a', '--audio-aac', dest='AudioM4A',
                     action='store_true', help='download m4a Audio Only')
 parser.add_argument('-v', '--version', action='version',
-                    version='Bilibili Downloader == 3.0')
+                    version='A-SoulMP3maker == 1.0')
 args = parser.parse_args()
 assert args.Address is not None
 # print(args)
@@ -48,7 +45,6 @@ class bili_downloader(object):
         self.VQuality = args.VideoQuality
         self.AQuality = args.AudioQuality
         self.output = args.Output
-        self.synthesis = args.Synthesis
         self.re_playinfo = 'window.__playinfo__=([\s\S]*?)</script>'
         self.re_INITIAL_STATE = 'window.__INITIAL_STATE__=([\s\S]*?);\(function'
         self.vname_expression = '<title(.*?)</title>'
@@ -185,6 +181,7 @@ class bili_downloader(object):
             print("PreInfo:", e)
             return 0, "", "", {}
 
+        #
     def search_videoList(self, index_url):
         res = requests.get(index_url, headers=self.index_headers, stream=False)
         dec = res.content.decode('utf-8')
@@ -209,7 +206,7 @@ class bili_downloader(object):
 
     # Show preDownload Detail
     def show_preDetail(self):
-        #flag,video_name,length,down_dic,init_list = self.search_preinfo()
+        # flag,video_name,length,down_dic,init_list = self.search_preinfo()
         temp = self.search_preinfo(self.index_url)
         preList = self.search_videoList(self.index_url)
         if temp[0] and preList[0] != 0:
@@ -251,9 +248,13 @@ class bili_downloader(object):
             print("尚未找到源地址，请检查网站地址或充值大会员！")
 
     # Download Stream fuction
-    def d_processor(self, url_list, output_dir, output_file, dest):
+    def d_processor(self, url_list, output_dir, output_file, dest) -> str:
+        """
+            函数返回值报告了下载流的码率
+        """
         for line in url_list:
             print('使用线路：', line.split("?")[0])
+            # 下载流信息
             try:
                 # video stream length sniffing
                 video_bytes = requests.get(
@@ -268,6 +269,11 @@ class bili_downloader(object):
                     line, headers=self.second_headers, stream=True)
                 pbar = tqdm(total=int(vc_range), initial=0, unit='b',
                             leave=True, desc='正在'+dest, unit_scale=True)
+            except Exception as e:
+                print("{}下载出错：{}".format(dest, e))
+                os.remove(output_file)
+                return -1
+            try:
                 if not os.path.exists(output_dir):
                     os.makedirs(output_dir)
                 with open(output_file, 'ab') as f:
@@ -276,39 +282,25 @@ class bili_downloader(object):
                             f.write(chunks)
                             pbar.update(self.chunk_size)
                 pbar.close()
+            except Exception as e:
+                print("{}写入出错：{}".format(dest, e))
+                os.remove(output_file)
+                return -1
+            if os.path.getsize(output_file) != 0:
                 print("{}成功！".format(dest))
                 break
-            except Exception as e:
-                print("{}出错：{}".format(dest, e))
-                os.remove(output_dir)
-    # Synthesis audio and video function
+            else:
+                print("下载失败，正在尝试下一条线路")
 
-    def ffmpeg_synthesis(self, input_v, input_a, output_add):
-        ffcommand = ""
-        if self.systemd == "win32":
-            ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
-            ffcommand = ffpath + r'/ffmpeg.exe -i ' + input_v + ' -i ' + \
-                input_a + ' -c:v copy -c:a copy -strict experimental ' + output_add
-        elif self.systemd in ["linux", "darwin"]:
-            ffcommand = 'ffmpeg -i ' + input_v + ' -i  ' + input_a + \
-                ' -c:v copy -c:a copy -strict experimental ' + output_add
-        else:
-            print("未知操作系统：无法确定FFMpeg命令。")
-            return -2
-        try:
-            if subprocess.call(ffcommand, shell=True):
-                raise Exception("{} 执行失败。".format(ffcommand))
-            print("视频合并完成！")
-            os.remove(input_v)
-            os.remove(input_a)
-        except Exception as e:
-            print("视频合成失败：", e)
-
-    def ffmpeg_convertmp3(self, input_a, output_add, type):
+    # Convert m4s to other
+    def ffmpeg_convertmp3(self, input_a, output_add, type, rate=-1):
+        rate = str(int(rate)//1000)
         if type == 'mp3':
-            fcommand = '"'+input_a+'"' + ' -loglevel quiet -c:a mp3 "'+output_add+r'.mp3"'
+            fcommand = ('"'+input_a+'" ') + '-loglevel quiet -c:a mp3 ' + \
+                '-b:a '+rate + ('k "'+output_add+'.mp3"')
         elif type == 'm4a':
-            fcommand = '"'+input_a+'"' + ' -loglevel quiet -c:a alac "'+output_add+r'.m4a"'
+            fcommand = ('"'+input_a+'" ') + '-loglevel quiet -ar 44100 -ac 2 -ab ' + \
+                rate + ('k "'+output_add+'.m4a"')
         if self.systemd == "win32":
             ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
             ffcommand = ffpath + r'/ffmpeg.exe -i ' + fcommand
@@ -326,52 +318,11 @@ class bili_downloader(object):
         except Exception as e:
             print("音频转换失败：", e)
 
-    # For Download Single Video
-    def Download_single(self, index=""):
-        # Get video pre-detial
-        if index == "":
-            flag, self.video_name, _, down_dic = self.search_preinfo(
-                self.index_url)
-            index = self.index_url
-        else:
-            flag, self.video_name, _, down_dic = self.search_preinfo(index)
-        # If we can access the video page
-        if flag:
-            # Judge file whether exists
-            video_dir = self.output + r'/' + self.video_name + '_video.m4s'
-            audio_dir = self.output + r'/' + self.video_name + '_audio.m4s'
-            if os.path.exists(video_dir):
-                print("文件：{}\n已存在。".format(video_dir))
-                return -1
-            if os.path.exists(audio_dir):
-                print("文件：{}\n已存在。".format(audio_dir))
-                return -1
-            print("需要下载的视频：", self.video_name)
-            # Perform video stream length sniffing
-            self.second_headers['referer'] = index
-            self.second_headers['range'] = down_dic["video"][self.VQuality][2]
-            # Switch between main line and backup line(video).
-            self.d_processor(
-                down_dic["video"][self.VQuality][1], self.output, video_dir, "下载视频")
-            # Perform audio stream length sniffing
-            self.second_headers['range'] = down_dic["audio"][self.AQuality][2]
-            # Switch between main line and backup line(audio).
-            self.d_processor(
-                down_dic["audio"][self.AQuality][1], self.output, audio_dir, "下载音频")
-            # Merge audio and video (USE FFMPEG)
-            if self.synthesis:
-                print('正在启动ffmpeg......')
-                # Synthesis processor
-                self.ffmpeg_synthesis(
-                    video_dir, audio_dir, self.output + r'/' + self.video_name + '.mp4')
-        else:
-            print("下载失败：尚未找到源地址，请检查网站地址或充值大会员！")
+    def where_ffmpeg():
+        pass
 
     # Download Audio only
     def Download_audio(self, index="", type="m4a"):
-        """
-                只是把Download_single里关于视频的删了
-        """
         # Get video pre-detial
         if index == "":
             flag, self.video_name, _, down_dic = self.search_preinfo(
@@ -395,17 +346,16 @@ class bili_downloader(object):
             # Switch between main line and backup line(audio).
             self.d_processor(
                 down_dic["audio"][self.AQuality][1], self.output, audio_dir, "下载音频")
+            Brate = re.findall(
+                '(?<=音频带宽：)\d*', down_dic["audio"][self.AQuality][0])[0]
             # Convert audio into mp3 (USE FFMPEG)
             # Convert audio m4s into mp3
             self.ffmpeg_convertmp3(
-                audio_dir, self.output + r'/' + self.video_name, type)
+                audio_dir, self.output + r'/' + self.video_name, type, Brate)
             # Merge cover image to mp3 if exist
             cover_bytes = self.Download_cover()
             if cover_bytes:
-                try:
-                    self.Merge_cover(type, cover_bytes)
-                except NotImplementedError:
-                    os.remove(audio_dir[:-10]+'.'+type)
+                self.Merge_cover(type, cover_bytes)
         else:
             print("下载失败：尚未找到源地址，请检查网站地址或充值大会员！")
 
@@ -451,187 +401,31 @@ class bili_downloader(object):
         if all_list[0] == 1:
             if r_list[0] == 0:
                 for p in all_list[1]["pages"]:
-                    self.Download_single(preIndex+"?p="+str(p["page"]))
+                    self.Download_audio(preIndex+"?p="+str(p["page"]))
                 print("列表视频下载完成！")
             else:
                 listLEN = len(all_list[1]["pages"])
                 for i in r_list:
                     if i <= listLEN:
-                        self.Download_single(preIndex+"?p="+str(i))
+                        self.Download_audio(preIndex+"?p="+str(i))
                     else:
                         continue
                 print("列表视频下载完成！")
         if all_list[0] == 2:
             if r_list[0] == 0:
                 for p in all_list[1]["pages"]:
-                    self.Download_single(p["link"])
+                    self.Download_audio(p["link"])
                 print("媒体视频下载完成！")
             else:
                 listLEN = len(all_list[1]["pages"])
                 for i in r_list:
                     if i <= listLEN:
-                        self.Download_single(all_list[1]["pages"][i-1]["link"])
+                        self.Download_audio(all_list[1]["pages"][i-1]["link"])
                     else:
                         continue
                 print("媒体视频下载完成！")
         else:
             print("未找到视频列表信息。")
-
-    # Interactive video download
-    def requests_start(self):
-        url = self.index_url
-        self.now_interact = {"cid": "", "bvid": "", "session": "",
-                             "graph_version": "", "node_id": "", "vname": ""}
-        iv_structure = {}
-        t = self.Get_Init_Info(url)
-        if t[0]:
-            print(t[1])
-            return -1
-        self.index_headers['referer'] = url
-        self.second_headers = self.index_headers
-        t = self.isInteract()
-        if t[0]:
-            print(t[1])
-            return -1
-        print(self.now_interact)
-        iv_structure[self.now_interact["vname"]] = {}
-        iv_structure[self.now_interact["vname"]] = self.recursion_GET_List()
-        # print(json.dumps(iv_structure))
-        self.recursion_for_Download(iv_structure, self.output)
-        print("下载交互视频成功。")
-
-    # Interactive video initial information
-    def Get_Init_Info(self, url):
-        try:
-            res = requests.get(url, headers=self.index_headers, stream=False)
-            dec = res.content.decode('utf-8')
-            playinfo = re.findall(self.re_playinfo, dec, re.S)
-            INITIAL_STATE = re.findall(self.re_INITIAL_STATE, dec, re.S)
-            if playinfo == [] or INITIAL_STATE == []:
-                raise Exception("无法找到初始化信息。")
-            playinfo = json.loads(playinfo[0])
-            INITIAL_STATE = json.loads(INITIAL_STATE[0])
-            self.now_interact["session"] = playinfo["session"]
-            self.now_interact["bvid"] = INITIAL_STATE["bvid"]
-            self.now_interact["cid"] = str(
-                INITIAL_STATE["cidMap"][INITIAL_STATE["bvid"]]["cids"]["1"])
-            self.now_interact["vname"] = self.name_replace(
-                INITIAL_STATE["videoData"]["title"])
-            return 0, ""
-        except Exception as e:
-            return 1, str(e)
-
-    # Judge the interactive video.
-    def isInteract(self):
-        make_API = "https://api.bilibili.com/x/player/v2?cid=" + \
-            self.now_interact["cid"] + "&bvid=" + self.now_interact["bvid"]
-        try:
-            res = requests.get(
-                make_API, headers=self.index_headers, stream=False)
-            des = json.loads(res.content.decode('utf-8'))
-            if "interaction" not in des["data"]:
-                raise Exception("非交互视频")
-            self.now_interact["graph_version"] = str(
-                des["data"]["interaction"]["graph_version"])
-            return 0, ""
-        except Exception as e:
-            return 1, str(e)
-
-    # Get interactive video pre-information
-    def down_list_make(self, cid_num):
-        make_API = "https://api.bilibili.com/x/player/playurl?cid=" + cid_num \
-            + "&bvid=" + self.now_interact["bvid"] + "&qn=116&type=&otype=json&fourk=1&fnver=0&fnval=976&session=" + \
-            self.now_interact["session"]
-        try:
-            des = requests.get(
-                make_API, headers=self.index_headers, stream=False)
-            playinfo = json.loads(des.content.decode('utf-8'))
-        except Exception as e:
-            return False, str(e)
-        if playinfo != {}:
-            re_GET = playinfo
-            # List Video Quality Table
-            temp_v = {}
-            for i in range(len(re_GET["data"]["accept_quality"])):
-                temp_v[str(re_GET["data"]["accept_quality"][i])] = str(
-                    re_GET["data"]["accept_description"][i])
-            # List Video Download Quality
-            down_dic = {"video": {}, "audio": {}}
-            i = 0
-            # Get Video identity information and Initial SegmentBase.
-            for dic in re_GET["data"]["dash"]["video"]:
-                if str(dic["id"]) in temp_v:
-                    qc = temp_v[str(dic["id"])]
-                    down_dic["video"][i] = [qc, [dic["baseUrl"]],
-                                            'bytes=' + dic["SegmentBase"]["Initialization"]]
-                    for a in range(len(dic["backupUrl"])):
-                        down_dic["video"][i][1].append(dic["backupUrl"][a])
-                    i += 1
-                else:
-                    continue
-            # List Audio Stream
-            i = 0
-            for dic in re_GET["data"]["dash"]["audio"]:
-                au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
-                down_dic["audio"][i] = [au_stream, [dic["baseUrl"]],
-                                        'bytes=' + dic["SegmentBase"]["Initialization"]]
-                for a in range(len(dic["backupUrl"])):
-                    down_dic["audio"][i][1].append(dic["backupUrl"][a])
-                i += 1
-            # Get Video Length
-            length = re_GET["data"]["dash"]["duration"]
-            # Return Data
-            return True, length, down_dic
-        else:
-            return False, "Get Download List Error."
-
-    # Get interactive video node list (Use recursion algorithm)
-    def recursion_GET_List(self):
-        temp = {"choices": {}}
-        temp["cid"] = self.now_interact["cid"]
-        if self.now_interact["node_id"] == "":
-            make_API = "https://api.bilibili.com/x/stein/nodeinfo?bvid=" + \
-                self.now_interact["bvid"] + "&graph_version=" + \
-                self.now_interact["graph_version"]
-        else:
-            make_API = "https://api.bilibili.com/x/stein/nodeinfo?bvid=" + \
-                self.now_interact["bvid"] + "&graph_version=" + \
-                self.now_interact["graph_version"] + \
-                "&node_id=" + self.now_interact["node_id"]
-        des = requests.get(make_API, headers=self.index_headers, stream=False)
-        desp = json.loads(des.content.decode('utf-8'))
-        if "edges" not in desp["data"]:
-            return temp
-        for ch in desp["data"]["edges"]["choices"]:
-            self.now_interact["cid"] = str(ch["cid"])
-            self.now_interact["node_id"] = str(ch["node_id"])
-            temp["choices"][ch["option"]] = self.recursion_GET_List()
-        return temp
-
-    # Interactive video download processor (Use recursion algorithm)
-    def recursion_for_Download(self, json_list, output_dir):
-        for ch in json_list:
-            chn = self.name_replace(ch)
-            output = output_dir + "/" + chn
-            video_dir = output + "/" + chn + '_video.m4s'
-            audio_dir = output + "/" + chn + '_audio.m4s'
-            dic_return = self.down_list_make(json_list[ch]["cid"])
-            if not dic_return[0]:
-                print(dic_return[1])
-                return -1
-            down_dic = dic_return[2]
-            self.second_headers["range"] = down_dic["video"][self.VQuality][2]
-            self.d_processor(
-                down_dic["video"][self.VQuality][1], output, video_dir, "下载视频：" + chn)
-            self.second_headers['range'] = down_dic["audio"][self.AQuality][2]
-            self.d_processor(
-                down_dic["audio"][self.AQuality][1], output, audio_dir, "下载音频：" + chn)
-            if self.synthesis:
-                print('正在启动ffmpeg......')
-                self.ffmpeg_synthesis(
-                    video_dir, audio_dir, output + r'/' + chn + '.mp4')
-            self.recursion_for_Download(json_list[ch]["choices"], output)
-        return 0
 
 
 if __name__ == '__main__':
@@ -644,7 +438,5 @@ if __name__ == '__main__':
         rundownloader.Download_audio(type='m4a')
     elif args.DownList != None:
         rundownloader.Download_List()
-    elif args.interact:
-        rundownloader.requests_start()
     else:
-        rundownloader.Download_single()
+        rundownloader.Download_audio(type='mp3')
