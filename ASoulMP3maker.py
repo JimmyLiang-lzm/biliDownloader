@@ -2,7 +2,7 @@
 import os
 import sys
 import argparse
-import time
+import subprocess
 
 parser = argparse.ArgumentParser(description='Asoul\'s song Downloader')
 parser.add_argument('-mp3', '--audio-mp3', dest='AudioMP3',
@@ -13,24 +13,29 @@ args = parser.parse_args()
 type = 'mp3' if args.AudioMP3 else 'm4a'
 
 with open(sys.path[0] + r"/downloadlist.txt", "r") as listtxt:
+    errorlist = []
+    os.chdir(sys.path[0])
     for i in listtxt.readlines():
-        time.sleep(3)
         try:
             os.path.exists(sys.path[0]+r"/download")
         except FileNotFoundError:
             os.mkdir(sys.path[0]+r"/download")
         try:
-            os.system(
-                "python3 "
-                + sys.path[0]
-                + r"/bili_Download.py -o"
-                + sys.path[0]
-                + '/download -'
-                + type
-                + ' -a '
-                + i
+            one_audio = subprocess.run(
+                ["python3",
+                r"./bili_Download.py",
+                "-o",
+                './download',
+                '-'+type,
+                '-a',
+                i.replace('\n','')]
             )
+            if one_audio.returncode != 0: 
+                errorlist.append(i)
         except Exception as e:
             print(e)
         print("*" * 40)
-    print("finished")
+    print('finished')
+    if errorlist:
+        print('以下链接视频下载失败，共计',len(errorlist),'个')
+        print(errorlist)

@@ -248,6 +248,7 @@ class bili_downloader(object):
                     ic += 1
         else:
             print("尚未找到源地址，请检查网站地址或充值大会员！")
+            exit(1)
 
     # Download Stream fuction
     def d_processor(self, url_list, output_dir, output_file, dest) -> str:
@@ -274,7 +275,7 @@ class bili_downloader(object):
             except Exception as e:
                 print("{}下载出错：{}".format(dest, e))
                 os.remove(output_file)
-                return -1
+                exit(1)
             try:
                 if not os.path.exists(output_dir):
                     os.makedirs(output_dir)
@@ -287,7 +288,7 @@ class bili_downloader(object):
             except Exception as e:
                 print("{}写入出错：{}".format(dest, e))
                 os.remove(output_file)
-                return -1
+                exit(1)
             if os.path.getsize(output_file) != 0:
                 print("{}成功！".format(dest))
                 break
@@ -313,7 +314,7 @@ class bili_downloader(object):
                 ffcommand = 'ffmpeg -i ' + fcommand
             else:
                 print("未知操作系统：无法确定FFMpeg命令。")
-                return -2
+                exit(1)
         try:
             print('启动ffmpeg:\t'+ffcommand)
             if subprocess.call(ffcommand, shell=True):
@@ -341,7 +342,7 @@ class bili_downloader(object):
             audio_dir = self.output + r'/' + self.video_name + '_audio.m4s'
             if os.path.exists(audio_dir[:-10]+r'.'+type):
                 print("音频文件：{}\n已存在,跳过下载。".format(audio_dir))
-                return -1
+                exit(1)
             if os.path.exists(audio_dir):
                 print("临时文件：{}\n已存在,删除后重新下载。".format(audio_dir))
                 os.remove(audio_dir)
@@ -363,6 +364,7 @@ class bili_downloader(object):
                 self.Merge_cover(type, cover_bytes)
         else:
             print("下载失败：尚未找到源地址，请检查网站地址或充值大会员！")
+            exit(1)
 
     def Merge_cover(self, type, cover: bytes) -> None:
         import music_tag
