@@ -28,8 +28,10 @@ parser.add_argument('-c', '--check', action='store_true',
                     help='Show video and audio download stream.')
 parser.add_argument('-mp3', '--audio-mp3', dest='AudioMP3',
                     action='store_true', help='download mp3 Audio Only')
-parser.add_argument('-m4a', '--audio-aac', dest='AudioM4A',
+parser.add_argument('-m4a', '--audio-m4a', dest='AudioM4A',
                     action='store_true', help='download m4a Audio Only')
+parser.add_argument('-aac', '--audio-aac', dest='AudioAAC',
+                    action='store_true', help='download aac Audio Only')
 parser.add_argument('-v', '--version', action='version',
                     version='A-SoulMP3maker == 1.0')
 args = parser.parse_args()
@@ -295,20 +297,23 @@ class bili_downloader(object):
     # Convert m4s to other
     def ffmpeg_convertmp3(self, input_a, output_add, type, rate=-1):
         rate = str(int(rate)//1000)
-        if type == 'mp3':
-            fcommand = ('"'+input_a+'" ') + '-loglevel quiet -c:a mp3 ' + \
-                '-b:a '+rate + ('k "'+output_add+'.mp3"')
-        elif type == 'm4a':
-            fcommand = ('"'+input_a+'" ') + '-loglevel quiet -ar 44100 -ac 2 -ab ' + \
-                rate + ('k "'+output_add+'.m4a"')
-        if self.systemd == "win32":
-            ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
-            ffcommand = ffpath + r'/ffmpeg.exe -i ' + fcommand
-        elif self.systemd in ["linux", "darwin"]:
-            ffcommand = 'ffmpeg -i ' + fcommand
+        if type == 'aac':
+            ffcommand = ('cp "'+input_a+'" ') + (' "'+output_add+'.aac"')
         else:
-            print("未知操作系统：无法确定FFMpeg命令。")
-            return -2
+            if type == 'mp3':
+                fcommand = ('"'+input_a+'" ') + '-loglevel quiet -c:a mp3 ' + \
+                    '-ab '+rate + ('k "'+output_add+'.mp3"')
+            elif type == 'm4a':
+                fcommand = ('"'+input_a+'" ') + '-loglevel quiet -ar 44100 -ac 2 -ab ' + \
+                    rate + ('k "'+output_add+'.m4a"')
+            if self.systemd == "win32":
+                ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
+                ffcommand = ffpath + r'/ffmpeg.exe -i ' + fcommand
+            elif self.systemd in ["linux", "darwin"]:
+                ffcommand = 'ffmpeg -i ' + fcommand
+            else:
+                print("未知操作系统：无法确定FFMpeg命令。")
+                return -2
         try:
             print('启动ffmpeg:\t'+ffcommand)
             if subprocess.call(ffcommand, shell=True):
@@ -362,12 +367,12 @@ class bili_downloader(object):
     def Merge_cover(self, type, cover: bytes) -> None:
         import music_tag
         mysong = music_tag.load_file(
-            self.output + r'/' + self.video_name + r'.' + type)
+            self.output + r'/' + self.video_name + '.' + type)
         mysong['artwork'] = cover
         mysong['title'] = self.video_name
         mysong['artist'] = "A-Soul"
         mysong['album'] = u"A-Soul唱过的歌"
-        mysong['comment'] = "来源："+self.index_url
+        mysong['comment'] = u"来源："+self.index_url
         mysong.save()
 
     # Downloads Cover only
@@ -436,6 +441,8 @@ if __name__ == '__main__':
         rundownloader.Download_audio(type='mp3')
     elif args.AudioM4A:
         rundownloader.Download_audio(type='m4a')
+    elif args.AudioAAC:
+        rundownloader.Download_audio(type='aac')
     elif args.DownList != None:
         rundownloader.Download_List()
     else:
