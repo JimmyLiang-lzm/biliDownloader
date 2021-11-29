@@ -299,33 +299,41 @@ class bili_downloader(object):
     def ffmpeg_convertmp3(self, input_a, output_add, type, rate=-1):
         rate = str(int(rate)//1000)
         if type == 'aac':
-            ffcommand = ('cp "'+input_a+'" ') + (' "'+output_add+'.aac"')
+            # aac不需要转码，改个后缀就行
+            os.rename(input_a,output_add+'.aac')
         else:
+            # 需要调用ffmpeg转码的参数
             if type == 'mp3':
                 fcommand = ('"'+input_a+'" ') + '-loglevel quiet -c:a mp3 ' + \
                     '-ab '+rate + ('k "'+output_add+'.mp3"')
             elif type == 'm4a':
                 fcommand = ('"'+input_a+'" ') + '-loglevel quiet -ar 44100 -ac 2 -ab ' + \
                     rate + ('k "'+output_add+'.m4a"')
-            if self.systemd == "win32":
-                ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
-                ffcommand = ffpath + r'/ffmpeg.exe -i ' + fcommand
-            elif self.systemd in ["linux", "darwin"]:
-                ffcommand = 'ffmpeg -i ' + fcommand
-            else:
-                print("未知操作系统：无法确定FFMpeg命令。")
+            # 拼装ffmpeg和它的参数，然后执行
+            ffcommand = self.where_ffmpeg() + fcommand
+            try:
+                print('启动ffmpeg:\t'+ffcommand)
+                if subprocess.call(ffcommand, shell=True):
+                    raise Exception("{} 执行失败。".format(ffcommand))
+                print("音频转换完成！")
+                os.remove(input_a)
+            except Exception as e:
+                print("音频转换失败：", e)
                 exit(1)
-        try:
-            print('启动ffmpeg:\t'+ffcommand)
-            if subprocess.call(ffcommand, shell=True):
-                raise Exception("{} 执行失败。".format(ffcommand))
-            print("音频转换完成！")
-            os.remove(input_a)
-        except Exception as e:
-            print("音频转换失败：", e)
 
-    def where_ffmpeg():
-        pass
+    def where_ffmpeg(self) -> str:
+        '''
+            返回可调用ffmpeg的命令
+        '''
+        if self.systemd == "win32" and os.path.exists('./ffmpeg.exe'):
+            ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
+            return ffpath + r'/ffmpeg.exe -i '
+        if subprocess.run('ffmpeg -version').returncode == 0:
+            return 'ffmpeg -i '
+        else:
+            print("无法确定FFMpeg命令。")
+            exit(1)
+
 
     # Download Audio only
     def Download_audio(self, index="", type="m4a"):

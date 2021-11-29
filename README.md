@@ -9,14 +9,15 @@
 ### 安装
 
 在python的3.8和3.9下测试通过，理论上python3都可以用，使用前请先安装对应的python库并切换工作目录。
+**请确保命令行中能够使用python3而非python**
 
 ```shell
 cd ASoulMP3maker
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 -   **Windows部署**：
-    1. 如果已经在环境变量中添加了ffmpeg.exe，则无需手动复制ffmpeg到当前目录
+    1. 如果已经在环境变量中添加了ffmpeg，则无需手动复制ffmpeg到当前目录。换言之，如果要使用系统中的ffmpeg，请保证当前目录下没有ffmpeg.exe
     2. 否则需要手动进行**FFMpeg**程序的下载，👉[点击这里](http://ffmpeg.org/download.html)👈进入官网进行下载。
     3. 将下载的压缩包解压后，复制压缩文件中的`ffmpeg.exe`并粘贴到`ASoulMP3maker`程序根目录下即可。
 -   **Linux和Mac OS部署**：
