@@ -421,7 +421,7 @@ class bili_downloader(object):
         if self.systemd == "win32" and os.path.exists("./ffmpeg.exe"):
             ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
             return ffpath + r"/ffmpeg.exe -i "
-        if subprocess.run("ffmpeg -version").returncode == 0:
+        if subprocess.run(["ffmpeg","-version"],stdout=subprocess.DEVNULL).returncode == 0:
             return "ffmpeg -i "
         else:
             print("无法确定FFMpeg命令。")
