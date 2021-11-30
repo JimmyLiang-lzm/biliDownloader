@@ -84,6 +84,13 @@ def make_a_parser():
         help="download aac Audio Only",
     )
     parser.add_argument(
+        "-debug",
+        "--debug",
+        dest="debug",
+        action="store_true",
+        help="debug mode do not delete m4s",
+    )
+    parser.add_argument(
         "-v", "--version", action="version", version="A-SoulMP3maker == 1.0"
     )
     return parser.parse_args()
@@ -101,6 +108,7 @@ class bili_downloader(object):
         self.VQuality = args.VideoQuality
         self.AQuality = args.AudioQuality
         self.output = args.Output
+        self.debug = args.debug
         self.re_playinfo = "window.__playinfo__=([\s\S]*?)</script>"
         self.re_INITIAL_STATE = "window.__INITIAL_STATE__=([\s\S]*?);\(function"
         self.vname_expression = "<title(.*?)</title>"
@@ -400,7 +408,8 @@ class bili_downloader(object):
                 if subprocess.call(ffcommand, shell=True):
                     raise Exception("{} 执行失败。".format(ffcommand))
                 print("音频转换完成！")
-                os.remove(input_a)
+                if not self.debug:
+                    os.remove(input_a)
             except Exception as e:
                 print("音频转换失败：", e)
                 exit(1)
