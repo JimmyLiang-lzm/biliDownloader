@@ -28,12 +28,12 @@ pip3 install -r requirements.txt
 #### 下载单个视频并转换
 
 ```shell
-python3 bili_Download.py -a [HTTPAddress] -mp3
+python3 bili_Download.py -a <HTTPAddress> -mp3
 # 或者
-python3 bili_Download.py -a [HTTPAddress] -m4a
-python3 bili_Download.py -a [HTTPAddress] -aac
+python3 bili_Download.py -a <HTTPAddress> -m4a
+python3 bili_Download.py -a <HTTPAddress> -aac
 ```
-1.   将`[HTTPAddress]`换成你要下载的视频地址，如`https://www.bilibili.com/video/BV1ER4y1E7qn`。
+1.   将`<HTTPAddress>`换成你要下载的视频地址，如`https://www.bilibili.com/video/BV1ER4y1E7qn`。
 
 2.  在某一次更新中增加了补充歌手名称和专辑名称功能。将歌手名固定为A-Soul，专辑名为《A-Soul唱过的歌》，并在歌曲的注释信息中添加了下载的来源地址。
 
@@ -48,7 +48,7 @@ python3 bili_Download.py -a [HTTPAddress] -aac
 python3 ASoulMP3maker.py -mp3
 # 或者
 python3 ASoulMP3maker.py -m4a
-python3 ASoulMP3maker.py -m4a
+python3 ASoulMP3maker.py -aac
 ```
 > 作者在downloadlist.txt中添加了几首歌作为测试，正式使用前可以删掉
 
