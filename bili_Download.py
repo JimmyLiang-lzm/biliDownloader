@@ -105,6 +105,7 @@ class bili_downloader(object):
         self.re_INITIAL_STATE = "window.__INITIAL_STATE__=([\s\S]*?);\(function"
         self.vname_expression = "<title(.*?)</title>"
         self.chunk_size = 1024
+        self.systemd = sys.platform
         self.index_headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"
         }
@@ -118,12 +119,11 @@ class bili_downloader(object):
             "sec-fetch-mode": "cors",
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36",
         }
-        with open("setting.conf", "r", encoding="utf-8") as f:
+        with open("cookie.conf", "r", encoding="utf-8") as f:
             tempr = json.loads(f.read())
             self.index_headers["cookie"] = tempr["cookie"]
             self.second_headers["cookie"] = tempr["cookie"]
-            self.systemd = sys.platform
-            f.close()
+            
 
     # File name conflict replace
     def name_replace(self, name):

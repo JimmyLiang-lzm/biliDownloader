@@ -11,4 +11,4 @@ pywin32-ctypes==0.2.0
 requests==2.26.0
 tqdm==4.62.1
 urllib3==1.26.6
-eyed3
+music_tag
