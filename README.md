@@ -68,7 +68,7 @@ python3 ASoulMP3maker.py -aac
 
 ## 感谢
 
-谢谢[JimmyLiang-lzm/biliDownloader)](https://github.com/JimmyLiang-lzm/biliDownloader)完成的基础工作。
+谢谢[JimmyLiang-lzm/biliDownloader)](https://github.com/JimmyLiang-lzm/biliDownloader)完成的基础工作，感谢豆瓣@喵呜提供的宝贵建议。
 
 ## 声明
 
