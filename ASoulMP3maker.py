@@ -14,6 +14,7 @@ type = 'mp3' if args.AudioMP3 else 'm4a'
 
 with open(sys.path[0] + r"/downloadlist.txt", "r") as listtxt:
     errorlist = []
+    lowQlist = []
     os.chdir(sys.path[0])
     for i in listtxt.readlines():
         try:
@@ -22,7 +23,7 @@ with open(sys.path[0] + r"/downloadlist.txt", "r") as listtxt:
             os.mkdir(sys.path[0]+r"/download")
         try:
             one_audio = subprocess.run(
-                ["python3",
+                ["python",
                 r"./bili_Download.py",
                 "-o",
                 './download',
@@ -30,8 +31,10 @@ with open(sys.path[0] + r"/downloadlist.txt", "r") as listtxt:
                 '-a',
                 i.replace('\n','')]
             )
-            if one_audio.returncode != 0: 
+            if one_audio.returncode == 1: 
                 errorlist.append(i)
+            elif one_audio.returncode == 2:
+                lowQlist.append(i)
         except Exception as e:
             print(e)
         print("*" * 40)
@@ -39,3 +42,6 @@ with open(sys.path[0] + r"/downloadlist.txt", "r") as listtxt:
     if errorlist:
         print('以下链接视频下载失败，共计',len(errorlist),'个')
         print(errorlist)
+    if lowQlist:
+        print('一下链接的码率低于128k，但仍下载下来了')
+        print(lowQlist)
