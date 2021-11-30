@@ -9,7 +9,7 @@
 ### 安装
 
 在python的3.8和3.9下测试通过，理论上python3都可以用，使用前请先安装对应的python库并切换工作目录。
-**请确保命令行中能够使用python3而非python**
+> **windows用户请确保命令行中通过python命令调用的是python3**。对于从微软商店安装python3的用户，请卸载并安装官网版本。或将代码./ASoulMP3maker.py中的第16行的井号(#)删掉
 
 ```shell
 cd ASoulMP3maker

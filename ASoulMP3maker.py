@@ -12,6 +12,9 @@ parser.add_argument('-m4a', '--audio-m4a', dest='AudioM4A',
 args = parser.parse_args()
 type = 'mp3' if args.AudioMP3 else 'm4a'
 
+pycmd = 'python' if sys.platform=='win32' else 'python3'
+#pycmd = 'python3'
+
 with open(sys.path[0] + r"/downloadlist.txt", "r") as listtxt:
     errorlist = []
     lowQlist = []
@@ -23,7 +26,7 @@ with open(sys.path[0] + r"/downloadlist.txt", "r") as listtxt:
             os.mkdir(sys.path[0]+r"/download")
         try:
             one_audio = subprocess.run(
-                ["python",
+                [pycmd,
                 r"./bili_Download.py",
                 "-o",
                 './download',
