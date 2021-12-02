@@ -389,8 +389,8 @@ class bili_downloader(object):
         if type == "aac":
             # aac和m4a不需要转码，改个后缀就行
             os.rename(input_a, output_add + ".aac")
-        elif type == "m4a":
-            os.rename(input_a, output_add + ".m4a")
+        #elif type == "m4a":
+        #   os.rename(input_a, output_add + ".m4a")
         else:
             # 需要调用ffmpeg转码的参数
             if type == "mp3":
@@ -400,6 +400,14 @@ class bili_downloader(object):
                     + "-ab "
                     + rate
                     + ('k "' + output_add + '.mp3"')
+                )
+            if type == "m4a":
+                fcommand = (
+                    ('"' + input_a + '" ')
+                    + "-loglevel quiet "
+                    + "-ab "
+                    + rate
+                    + ('k "' + output_add + '.m4a"')
                 )
             # 拼装ffmpeg和它的参数，然后执行
             ffcommand = self.where_ffmpeg() + fcommand
