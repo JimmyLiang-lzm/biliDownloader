@@ -1,8 +1,13 @@
 ## 项目介绍
 
 为了方便下载的ASoul唱过的歌，并且在MP3或者iTunes里能有一个好看的封面和完善的歌曲信息，本项目在[JimmyLiang-lzm/biliDownloader（基于版本:5f61cae5fa016c591f57a5553fe6faf9fddf6493）](https://github.com/JimmyLiang-lzm/biliDownloader)的基础上增加修改了一些功能，完成了一个专用于下载A-Soul成员在B站上的投稿视频并转换为带标签MP3的工具。
+>   某次更新后封面更新为放大加高斯模糊叠底，例如
+>   
+>   ![封面](https://user-images.githubusercontent.com/37724877/144447122-83d47cba-63b9-4bd0-bfe5-d16d37b9e51b.PNG)
 
->   不知道提供下载会不会构成侵权，先给小伙伴们说一声对不起🙇←🏃
+
+
+>   不知道提供下载会不会构成侵权，先给小伙伴们说一声对不起🙇←🏃，项目封面直接使用了up主的视频封面，可能也有点不妥。
 
 ## ASoulMP3maker
 
@@ -39,7 +44,7 @@ python3 bili_Download.py -a <HTTPAddress> -aac
 
 3. 地址后面跟着的`m4a、aac和mp3`用来控制下载音频文件的类型。
 
-<img src="https://i.loli.net/2021/11/28/TSIRH25DmjUX8po.png" alt="image-20211128141922577" style="zoom: 33%;" />
+![专辑信息](https://user-images.githubusercontent.com/37724877/144447137-ef687305-d95e-4160-96b1-a70e88f1d807.jpg)
 
 #### 批量下载
 
