@@ -511,7 +511,7 @@ class bili_downloader(object):
         large = enhancer.enhance(0.7)
         gaus = large.filter(ImageFilter.GaussianBlur(radius=height//50))
         gaus.paste(img, [0, right])
-        gaus.show()
+        # gaus.show()
         b_img= BytesIO()
         gaus.save(b_img, format='jpeg')
         return b_img.getvalue()
