@@ -9,8 +9,10 @@ parser.add_argument('-mp3', '--audio-mp3', dest='AudioMP3',
                     action='store_true', help='download mp3 Audio Only')
 parser.add_argument('-m4a', '--audio-m4a', dest='AudioM4A',
                     action='store_true', help='download m4a Audio Only')
+parser.add_argument('-aac', '--audio-aac', dest='AudioAAC',
+                    action='store_true', help='download aac Audio Only')
 args = parser.parse_args()
-type = 'mp3' if args.AudioMP3 else 'm4a'
+type = 'mp3' if args.AudioMP3 else 'm4a' if args.AudioM4A else 'aac'
 
 pycmd = 'python' if sys.platform=='win32' else 'python3'
 #pycmd = 'python3'
