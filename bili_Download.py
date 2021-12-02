@@ -8,11 +8,15 @@ import json
 import html
 from tqdm import tqdm
 import subprocess
+from PIL import Image, ImageFilter, ImageEnhance
+from io import BytesIO
+import music_tag
 
 # Default Path
 DF_Path = os.path.dirname(os.path.realpath(sys.argv[0]))
 
-def make_a_parser(): 
+
+def make_a_parser():
     parser = argparse.ArgumentParser(description="Bilibili Video Downloader")
     parser.add_argument(
         "-a",
@@ -60,7 +64,10 @@ def make_a_parser():
         help='Audio quality. You can use "-c" or "--check" to view it, default is 0.',
     )
     parser.add_argument(
-        "-c", "--check", action="store_true", help="Show video and audio download stream."
+        "-c",
+        "--check",
+        action="store_true",
+        help="Show video and audio download stream.",
     )
     parser.add_argument(
         "-mp3",
@@ -94,6 +101,7 @@ def make_a_parser():
         "-v", "--version", action="version", version="A-SoulMP3maker == 1.0"
     )
     return parser.parse_args()
+
 
 args = make_a_parser()
 assert args.Address is not None
@@ -131,7 +139,6 @@ class bili_downloader(object):
             tempr = json.loads(f.read())
             self.index_headers["cookie"] = tempr["cookie"]
             self.second_headers["cookie"] = tempr["cookie"]
-            
 
     # File name conflict replace
     def name_replace(self, name):
@@ -261,6 +268,7 @@ class bili_downloader(object):
 
         #
 
+    # 
     def search_videoList(self, index_url):
         res = requests.get(index_url, headers=self.index_headers, stream=False)
         dec = res.content.decode("utf-8")
@@ -389,7 +397,7 @@ class bili_downloader(object):
         if type == "aac":
             # aac和m4a不需要转码，改个后缀就行
             os.rename(input_a, output_add + ".aac")
-        #elif type == "m4a":
+        # elif type == "m4a":
         #   os.rename(input_a, output_add + ".m4a")
         else:
             # 需要调用ffmpeg转码的参数
@@ -422,6 +430,7 @@ class bili_downloader(object):
                 print("音频转换失败：", e)
                 exit(1)
 
+    #
     def where_ffmpeg(self) -> str:
         """
         返回可调用ffmpeg的命令
@@ -429,7 +438,10 @@ class bili_downloader(object):
         if self.systemd == "win32" and os.path.exists("./ffmpeg.exe"):
             ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
             return ffpath + r"/ffmpeg.exe -i "
-        if subprocess.run(["ffmpeg","-version"],stdout=subprocess.DEVNULL).returncode == 0:
+        if (
+            subprocess.run(["ffmpeg", "-version"], stdout=subprocess.DEVNULL).returncode
+            == 0
+        ):
             return "ffmpeg -i "
         else:
             print("无法确定FFMpeg命令。")
@@ -476,11 +488,11 @@ class bili_downloader(object):
             print("下载失败：尚未找到源地址，请检查网站地址或充值大会员！")
             exit(1)
 
+    #
     def Merge_cover(self, type, cover: bytes) -> None:
-        import music_tag
-
         mysong = music_tag.load_file(self.output + r"/" + self.video_name + "." + type)
         if cover:
+            cover = self.cover_extend(cover)
             mysong["artwork"] = cover
         mysong["title"] = self.video_name
         mysong["artist"] = "A-Soul"
@@ -488,12 +500,28 @@ class bili_downloader(object):
         mysong["comment"] = u"来源：" + self.index_url
         mysong.save()
 
+    # 
+    def cover_extend(self, cover: bytes) -> bytes:
+        img = Image.open(BytesIO(cover))
+        width, height = img.size
+        right, left = (width - height) //2, (width + height) //2
+        cut = img.crop((right, 0, left, height))
+        large = cut.resize([width, width], Image.ANTIALIAS)
+        enhancer = ImageEnhance.Brightness(large)
+        large = enhancer.enhance(0.7)
+        gaus = large.filter(ImageFilter.GaussianBlur(radius=height//50))
+        gaus.paste(img, [0, right])
+        gaus.show()
+        b_img= BytesIO()
+        gaus.save(b_img, format='jpeg')
+        return b_img.getvalue()
+
     # Downloads Cover only
     def Download_cover(self) -> bytes:
         if self.cover_url:
             cover = requests.get(self.cover_url, headers=self.index_headers)
         if cover.status_code == 200:
-                return cover.content
+            return cover.content
         print("封面下载失败，跳过整合", self.cover_url)
         return None
 
