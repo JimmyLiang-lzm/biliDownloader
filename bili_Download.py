@@ -232,23 +232,40 @@ class bili_downloader(object):
                 vc_range = video_bytes.headers['Content-Range'].split('/')[1]
                 print("获取{}流范围为：{}".format(dest,vc_range))
                 print('{}文件大小：{} MB'.format(dest,round(float(vc_range) / self.chunk_size / 1024), 4))
-                # Get the full video stream
-                self.second_headers['range'] = 'bytes=0' + '-' + vc_range
-                m4sv_bytes = requests.get(line, headers=self.second_headers, stream=True, proxies=self.Proxy)
-                pbar = tqdm(total=int(vc_range), initial=0, unit='b', leave=True, desc='正在'+dest, unit_scale=True)
-                if not os.path.exists(output_dir):
-                    os.makedirs(output_dir)
-                with open(output_file, 'ab') as f:
-                    for chunks in m4sv_bytes.iter_content(chunk_size=self.chunk_size):
-                        if chunks:
-                            f.write(chunks)
-                            pbar.update(self.chunk_size)
+                # Get the full video stream (Init Value)
+                proc = {"Max": int(vc_range), "Now": 0}
+                err = 0
+                pbar = tqdm(total=proc["Max"], initial=0, unit='b', leave=True, desc='正在' + dest, unit_scale=True)
+                while(err <= 3):
+                    try:
+                        self.second_headers['range'] = 'bytes=' + str(proc["Now"]) + '-' + vc_range
+                        m4sv_bytes = requests.get(line, headers=self.second_headers, stream=True, timeout=10, proxies=self.Proxy)
+                        if not os.path.exists(output_dir):
+                            os.makedirs(output_dir)
+                        with open(output_file, 'ab') as f:
+                            for chunks in m4sv_bytes.iter_content(chunk_size=self.chunk_size):
+                                if chunks:
+                                    f.write(chunks)
+                                    proc["Now"] += self.chunk_size
+                                    pbar.update(self.chunk_size)
+                        if proc["Now"] >= proc["Max"]:
+                            m4sv_bytes.close()
+                            break
+                        else:
+                            print("服务器断开连接，重新连接下载端口....")
+                    except Exception as e:
+                        if re.findall('10054', str(e), re.S) == []:
+                            err += 1
+                        print(e, err)
+                if err > 3:
+                    raise Exception('线路出错，切换线路。')
                 pbar.close()
                 print("{}成功！".format(dest))
                 break
             except Exception as e:
                 print("{}出错：{}".format(dest,e))
-                os.remove(output_dir)
+                if os.path.exists(output_file):
+                    os.remove(output_file)
 
     # Synthesis audio and video function
     def ffmpeg_synthesis(self,input_v,input_a,output_add):
